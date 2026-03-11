@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
 
 const CATEGORIES = ["Brushes","Detergents","Squeegees","Filters","Batteries","Spare Parts"];
@@ -132,6 +132,16 @@ function downloadFile(content, filename, mimeType) {
 }
 
 // ── MAIN APP ─────────────────────────────────────────────────────────────────
+
+// ── localStorage helpers ──────────────────────────────────────────────────────
+function loadLS(key, fallback) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+}
+function saveLS(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+
 export default function MRPPlanner() {
   const [view,          setView]          = useState("workbench");
   const [selectedSKU,   setSelectedSKU]   = useState(null);
@@ -139,12 +149,17 @@ export default function MRPPlanner() {
   const [filterStatus,  setFilterStatus]  = useState("All");
   const [search,        setSearch]        = useState("");
   const [editingParams, setEditingParams] = useState(null);
-  const [catParams,     setCatParams]     = useState({...CATEGORY_DEFAULTS});
-  const [skusRaw,       setSkusRaw]       = useState(SKUS_DEFAULT);
-  const [openPOs,       setOpenPOs]       = useState(OPEN_POS_DEFAULT);
-  const [skuOverrides,  setSkuOverrides]  = useState(
-    Object.fromEntries(SKUS_DEFAULT.map(s=>[s.id, s.overrides]))
-  );
+  const [catParams,     setCatParams]     = useState(()=>loadLS('mrp_catParams', {...CATEGORY_DEFAULTS}));
+  const [skusRaw,       setSkusRaw]       = useState(()=>loadLS('mrp_skusRaw', SKUS_DEFAULT));
+  const [openPOs,       setOpenPOs]       = useState(()=>loadLS('mrp_openPOs', OPEN_POS_DEFAULT));
+  const [skuOverrides,  setSkuOverrides]  = useState(()=>loadLS('mrp_skuOverrides', Object.fromEntries(SKUS_DEFAULT.map(s=>[s.id, s.overrides]))));
+
+  // persist to localStorage on every change
+  useEffect(()=>saveLS('mrp_catParams',    catParams),    [catParams]);
+  useEffect(()=>saveLS('mrp_skusRaw',      skusRaw),      [skusRaw]);
+  useEffect(()=>saveLS('mrp_openPOs',      openPOs),      [openPOs]);
+  useEffect(()=>saveLS('mrp_skuOverrides', skuOverrides), [skuOverrides]);
+
   const [uploadMsg, setUploadMsg] = useState('');
   const fileRef = useRef();
 
@@ -287,6 +302,12 @@ export default function MRPPlanner() {
           <button className="btn" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>fileRef.current.click()}>
             ↑ Upload CSV/XLS
           </button>
+          <button className="btn" style={{fontSize:10,padding:"4px 10px",color:"#94a3b8"}} onClick={()=>{
+            if(confirm('Reset all data to defaults?')){
+              ['mrp_catParams','mrp_skusRaw','mrp_openPOs','mrp_skuOverrides'].forEach(k=>localStorage.removeItem(k));
+              window.location.reload();
+            }
+          }}>↺ Reset</button>
           {/* Download */}
           <button className="btn btn-green" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>downloadResults('csv')}>
             ↓ Export CSV
