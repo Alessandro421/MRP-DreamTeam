@@ -191,12 +191,12 @@ export default function MRPPlanner() {
         if (newSkus.length) {
           setSkusRaw(newSkus);
           setSkuOverrides(Object.fromEntries(newSkus.map(s=>[s.id, s.overrides])));
-          setUploadMsg(\`Loaded \${newSkus.length} SKUs from \${file.name}\`);
+          setUploadMsg(`Loaded ${newSkus.length} SKUs from ${file.name}`);
         }
         const poCount = Object.values(newPOs).flat().length;
         if (poCount) {
           setOpenPOs(newPOs);
-          setUploadMsg(prev=>prev+\` + \${poCount} open POs\`);
+          setUploadMsg(prev=>prev+` + ${poCount} open POs`);
         }
         if (!newSkus.length && !poCount) setUploadMsg('No valid SKU data found — check column headers.');
       } catch(err) {
@@ -227,7 +227,7 @@ export default function MRPPlanner() {
       Status:         STATUS_LABEL[s.mrp.status],
     }));
     const csv = toCSV(rows);
-    downloadFile(csv, \`mrp-results.\${fmt}\`, 'text/csv');
+    downloadFile(csv, `mrp-results.${fmt}`, 'text/csv');
   }
 
   return (
@@ -276,9 +276,9 @@ export default function MRPPlanner() {
           <span style={{color:"#94a3b8",fontSize:12}}>// EMEA</span>
         </div>
         {["workbench","exceptions","categories"].map(v=>(
-          <button key={v} className={\`nav-btn\${view===v||(view==="detail"&&v==="workbench")?" active":""}\`}
+          <button key={v} className={`nav-btn${view===v||(view==="detail"&&v==="workbench")?" active":""}`}
             onClick={()=>setView(v)}>
-            {v==="workbench"?"Planner Workbench":v==="exceptions"?\`Exceptions (\${exceptions.length})\`:"Category Summary"}
+            {v==="workbench"?"Planner Workbench":v==="exceptions"?`Exceptions (${exceptions.length})`:"Category Summary"}
           </button>
         ))}
         <div style={{marginLeft:"auto",display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
@@ -399,9 +399,9 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
                   <td style={{color:"#94a3b8"}}>{s.moq}</td>
                   <td style={{color:totalOpen>0?"#7c3aed":"#94a3b8"}}>{totalOpen>0?totalOpen:"—"}</td>
                   <td style={{color:s.mrp.orders.length>0?"#2563eb":"#94a3b8"}}>
-                    {s.mrp.orders.length>0?\`\${s.mrp.orders.length} × \${s.mrp.orders[0]?.qty}\`:"—"}
+                    {s.mrp.orders.length>0?`${s.mrp.orders.length} × ${s.mrp.orders[0]?.qty}`:"—"}
                   </td>
-                  <td><span className={\`pill badge-\${status}\`}>{STATUS_LABEL[status]}</span></td>
+                  <td><span className={`pill badge-${status}`}>{STATUS_LABEL[status]}</span></td>
                   <td>
                     <button className="btn" style={{padding:"3px 8px",fontSize:10}} onClick={e=>{e.stopPropagation();onEditParams(s);}}>PARAMS</button>
                   </td>
@@ -426,7 +426,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
         <span style={{color:"#2563eb",fontWeight:600,fontSize:16}}>{sku.id}</span>
         <span style={{color:"#0f172a",fontSize:14}}>{sku.name}</span>
         <span className="tag">{sku.category}</span>
-        <span className={\`pill badge-\${status}\`} style={{marginLeft:8}}>{STATUS_LABEL[status]}</span>
+        <span className={`pill badge-${status}`} style={{marginLeft:8}}>{STATUS_LABEL[status]}</span>
         <button className="btn" style={{marginLeft:"auto"}} onClick={onEditParams}>Edit Parameters</button>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:12,marginBottom:20}}>
@@ -456,7 +456,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0"/>
               <XAxis dataKey="day" stroke="#cbd5e1" tick={{fontSize:10,fill:"#94a3b8"}} label={{value:"Days",position:"insideBottomRight",fill:"#94a3b8",fontSize:10}}/>
               <YAxis stroke="#cbd5e1" tick={{fontSize:10,fill:"#94a3b8"}}/>
-              <Tooltip contentStyle={{background:"#ffffff",border:"1px solid #e2e8f0",borderRadius:4,fontSize:11,color:"#334155"}} labelFormatter={d=>\`Day \${d}\`}/>
+              <Tooltip contentStyle={{background:"#ffffff",border:"1px solid #e2e8f0",borderRadius:4,fontSize:11,color:"#334155"}} labelFormatter={d=>`Day ${d}`}/>
               <ReferenceLine y={sku.safetyStock} stroke="#ea580c" strokeDasharray="4 3" label={{value:"Safety",fill:"#ea580c",fontSize:10}}/>
               <ReferenceLine y={mrp.rop} stroke="#7c3aed" strokeDasharray="4 3" label={{value:"ROP",fill:"#7c3aed",fontSize:10}}/>
               <ReferenceLine y={0} stroke="#dc2626" strokeDasharray="2 2"/>
@@ -529,7 +529,7 @@ function ExceptionView({exceptions,onOpenDetail}) {
                   <div style={{color:"#2563eb",fontWeight:600,fontSize:13}}>{s.id}</div>
                   <div style={{color:"#0f172a",fontSize:12,marginTop:2}}>{s.name}</div>
                 </div>
-                <span className={\`pill badge-\${status}\`}>{STATUS_LABEL[status]}</span>
+                <span className={`pill badge-${status}`}>{STATUS_LABEL[status]}</span>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8}}>
                 {[
@@ -686,7 +686,7 @@ function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
         {fields.map(f=>(
           <div key={f.key} style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
             <label style={{fontSize:11,color:"#94a3b8",textTransform:"uppercase",letterSpacing:"0.06em",width:140}}>{f.label}</label>
-            <input className="input" type="number" placeholder={\`Cat: \${f.catVal}\`} value={draft[f.key]} style={{width:100,textAlign:"right"}}
+            <input className="input" type="number" placeholder={`Cat: ${f.catVal}`} value={draft[f.key]} style={{width:100,textAlign:"right"}}
               onChange={e=>setDraft(d=>({...d,[f.key]:e.target.value}))}/>
             {draft[f.key]!==""&&<span style={{fontSize:10,color:"#2563eb"}}>OVERRIDE</span>}
             <button className="btn" style={{fontSize:9,padding:"2px 7px",marginLeft:"auto"}}
