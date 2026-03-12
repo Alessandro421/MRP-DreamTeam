@@ -76,7 +76,7 @@ function calcMRP(sku, openPOs, horizon=90) {
 const STATUS_COLOR = { critical:"#ef4444","at-risk":"#f97316", watch:"#eab308", ok:"#22c55e" };
 const STATUS_LABEL = { critical:"CRITICAL","at-risk":"AT RISK", watch:"WATCH",   ok:"OK" };
 
-// ââ CSV / XLSX helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ CSV / XLSX helpers Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const headers = lines[0].split(',').map(h=>h.trim().toLowerCase());
@@ -89,7 +89,7 @@ function parseCSV(text) {
 }
 
 function rowsToSkus(rows) {
-  // Group rows by SKU id — aggregate: avg numeric fields, collect POs
+  // Group rows by SKU id â aggregate: avg numeric fields, collect POs
   const groups = {};
   rows.filter(r => r.id || r.sku).forEach(r => {
     const id = (r.id || r.sku || '').toUpperCase();
@@ -121,7 +121,7 @@ function rowsToSkus(rows) {
   });
 }
 function rowsToPOs(rows) {
-  // Collect all PO rows per SKU id — sum quantities for the same eta day
+  // Collect all PO rows per SKU id â sum quantities for the same eta day
   const pos = {};
   rows.filter(r => r.id || r.sku).forEach(r => {
     const id = (r.id || r.sku || '').toUpperCase();
@@ -155,9 +155,9 @@ function downloadFile(content, filename, mimeType) {
   URL.revokeObjectURL(url);
 }
 
-// ââ MAIN APP âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ MAIN APP Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 
-// ââ localStorage helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ localStorage helpers Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function loadLS(key, fallback) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
   catch { return fallback; }
@@ -211,7 +211,7 @@ export default function MRPPlanner() {
     return {cat,total:items.length,...counts};
   }), [enriched]);
 
-  // ââ File upload handler ââ
+  // Ã¢ÂÂÃ¢ÂÂ File upload handler Ã¢ÂÂÃ¢ÂÂ
   function handleUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -237,7 +237,7 @@ export default function MRPPlanner() {
           setOpenPOs(newPOs);
           setUploadMsg(prev=>prev+` + ${poCount} open POs`);
         }
-        if (!newSkus.length && !poCount) setUploadMsg('No valid SKU data found â check column headers.');
+        if (!newSkus.length && !poCount) setUploadMsg('No valid SKU data found Ã¢ÂÂ check column headers.');
       } catch(err) {
         setUploadMsg('Parse error: ' + err.message);
       }
@@ -246,7 +246,7 @@ export default function MRPPlanner() {
     e.target.value = '';
   }
 
-  // ââ Download MRP results ââ
+  // Ã¢ÂÂÃ¢ÂÂ Download MRP results Ã¢ÂÂÃ¢ÂÂ
   function downloadResults(fmt) {
     const rows = enriched.map(s=>({
       SKU:            s.id,
@@ -314,27 +314,27 @@ export default function MRPPlanner() {
           <span style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:700,fontSize:14,color:"#0f172a",letterSpacing:"0.05em"}}>MRP PLANNER</span>
           <span style={{color:"#94a3b8",fontSize:12}}>// EMEA</span>
         </div>
-        {["workbench","exceptions","categories"].map(v=>(
+        {["workbench","exceptions","categories","demand"].map(v=>(
           <button key={v} className={`nav-btn${view===v||(view==="detail"&&v==="workbench")?" active":""}`}
             onClick={()=>setView(v)}>
-            {v==="workbench"?"Planner Workbench":v==="exceptions"?`Exceptions (${exceptions.length})`:"Category Summary"}
+            {v==="workbench"?"Planner Workbench":v==="exceptions"?`Exceptions (${exceptions.length})`:v==="categories"?"Category Summary":"Demand Analysis"}
           </button>
         ))}
         <div style={{marginLeft:"auto",display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
           {/* Upload */}
           <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{display:"none"}} onChange={handleUpload}/>
           <button className="btn" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>fileRef.current.click()}>
-            â Upload CSV/XLS
+            Ã¢ÂÂ Upload CSV/XLS
           </button>
           <button className="btn" style={{fontSize:10,padding:"4px 10px",color:"#94a3b8"}} onClick={()=>{
             if(confirm('Reset all data to defaults?')){
               ['mrp_catParams','mrp_skusRaw','mrp_openPOs','mrp_skuOverrides'].forEach(k=>localStorage.removeItem(k));
               window.location.reload();
             }
-          }}>âº Reset</button>
+          }}>Ã¢ÂÂº Reset</button>
           {/* Download */}
           <button className="btn btn-green" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>downloadResults('csv')}>
-            â Export CSV
+            Ã¢ÂÂ Export CSV
           </button>
           <span className="tag">Horizon: 90d</span>
           <span className="tag">SKUs: {skusRaw.length}</span>
@@ -346,7 +346,7 @@ export default function MRPPlanner() {
       {uploadMsg&&(
         <div style={{background:"#eff6ff",borderBottom:"1px solid #bfdbfe",padding:"6px 24px",fontSize:11,color:"#2563eb",display:"flex",justifyContent:"space-between"}}>
           <span>{uploadMsg}</span>
-          <button style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:12}} onClick={()=>setUploadMsg('')}>â</button>
+          <button style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:12}} onClick={()=>setUploadMsg('')}>Ã¢ÂÂ</button>
         </div>
       )}
       {/* KPI BAR */}
@@ -384,6 +384,9 @@ export default function MRPPlanner() {
         {view==="categories"&&(
           <CategoryView catSummary={catSummary} catParams={catParams} setCatParams={setCatParams} enriched={enriched}/>
         )}
+      {view==="demand"&&(
+        <DemandView/>
+      )}
       </div>
       {editingParams&&(
         <ParamModal sku={editingParams} catParams={catParams}
@@ -395,12 +398,12 @@ export default function MRPPlanner() {
   );
 }
 
-// ââ WORKBENCH VIEW ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ WORKBENCH VIEW Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterStatus,search,setSearch,openPOs,onOpenDetail,onEditParams}) {
   return (
     <div>
       <div style={{display:"flex",gap:10,marginBottom:16,alignItems:"center",flexWrap:"wrap"}}>
-        <input className="input" placeholder="Search SKU / nameâ¦" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
+        <input className="input" placeholder="Search SKU / nameÃ¢ÂÂ¦" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
         <select className="select" value={filterCat} onChange={e=>setFilterCat(e.target.value)}>
           <option>All</option>
           {CATEGORIES.map(c=><option key={c}>{c}</option>)}
@@ -442,9 +445,9 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
                   </td>
                   <td style={{color:"#94a3b8"}}>{s.leadTime}d</td>
                   <td style={{color:"#94a3b8"}}>{s.moq}</td>
-                  <td style={{color:totalOpen>0?"#7c3aed":"#94a3b8"}}>{totalOpen>0?totalOpen:"â"}</td>
+                  <td style={{color:totalOpen>0?"#7c3aed":"#94a3b8"}}>{totalOpen>0?totalOpen:"Ã¢ÂÂ"}</td>
                   <td style={{color:s.mrp.orders.length>0?"#2563eb":"#94a3b8"}}>
-                    {s.mrp.orders.length>0?`${s.mrp.orders.length} Ã ${s.mrp.orders[0]?.qty}`:"â"}
+                    {s.mrp.orders.length>0?`${s.mrp.orders.length} ÃÂ ${s.mrp.orders[0]?.qty}`:"Ã¢ÂÂ"}
                   </td>
                   <td><span className={`pill badge-${status}`}>{STATUS_LABEL[status]}</span></td>
                   <td>
@@ -460,14 +463,14 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
   );
 }
 
-// ââ DETAIL VIEW âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ DETAIL VIEW Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
   const chartData = mrp.curve.filter((_,i)=>i%3===0);
   const status = mrp.status;
   return (
     <div>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-        <button className="btn" onClick={onBack}>â Back</button>
+        <button className="btn" onClick={onBack}>Ã¢ÂÂ Back</button>
         <span style={{color:"#2563eb",fontWeight:600,fontSize:16}}>{sku.id}</span>
         <span style={{color:"#0f172a",fontSize:14}}>{sku.name}</span>
         <span className="tag">{sku.category}</span>
@@ -494,7 +497,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
       <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:16}}>
         <div className="card" style={{padding:20}}>
           <div style={{fontSize:11,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:16}}>
-            Projected Stock Curve â 90 Day Horizon
+            Projected Stock Curve Ã¢ÂÂ 90 Day Horizon
           </div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={chartData} margin={{top:5,right:20,bottom:5,left:0}}>
@@ -527,7 +530,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
               <div key={i} style={{padding:"8px 0",borderBottom:"1px solid #f1f5f9",fontSize:12}}>
                 <div style={{display:"flex",justifyContent:"space-between"}}>
                   <span style={{color:"#2563eb"}}>{o.qty} units</span>
-                  <span style={{color:"#16a34a",fontSize:10}}>MOQâ</span>
+                  <span style={{color:"#16a34a",fontSize:10}}>MOQÃ¢ÂÂ</span>
                 </div>
                 <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
                   <span style={{color:"#94a3b8",fontSize:10}}>Order Day {o.orderDay}</span>
@@ -551,7 +554,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
   );
 }
 
-// ââ EXCEPTION VIEW ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ EXCEPTION VIEW Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function ExceptionView({exceptions,onOpenDetail}) {
   return (
     <div>
@@ -560,8 +563,8 @@ function ExceptionView({exceptions,onOpenDetail}) {
       </div>
       {exceptions.length===0&&(
         <div className="card" style={{padding:40,textAlign:"center",color:"#16a34a"}}>
-          <div style={{fontSize:24,marginBottom:8}}>â</div>
-          <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,color:"#0f172a"}}>No exceptions â all SKUs within parameters</div>
+          <div style={{fontSize:24,marginBottom:8}}>Ã¢ÂÂ</div>
+          <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,color:"#0f172a"}}>No exceptions Ã¢ÂÂ all SKUs within parameters</div>
         </div>
       )}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:12}}>
@@ -591,7 +594,7 @@ function ExceptionView({exceptions,onOpenDetail}) {
               </div>
               {s.mrp.orders.length>0&&(
                 <div style={{marginTop:10,fontSize:11,color:"#2563eb",background:"#eff6ff",border:"1px solid #bfdbfe",padding:"6px 10px",borderRadius:3}}>
-                  â {s.mrp.orders.length} planned order(s) Â· Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
+                  Ã¢ÂÂ {s.mrp.orders.length} planned order(s) ÃÂ· Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
                 </div>
               )}
             </div>
@@ -602,7 +605,7 @@ function ExceptionView({exceptions,onOpenDetail}) {
   );
 }
 
-// ââ CATEGORY VIEW âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ CATEGORY VIEW Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function CategoryView({catSummary,catParams,setCatParams,enriched}) {
   const [editCat,setEditCat]=useState(null);
   const [draft,setDraft]=useState({});
@@ -638,8 +641,8 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
         <div className="card" style={{padding:20}}>
           <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Planning Logic & Upload Format</div>
           <div style={{fontSize:11,color:"#64748b",lineHeight:1.8}}>
-            <p style={{marginBottom:8}}><span style={{color:"#7c3aed"}}>Reorder Point</span> = Safety Stock + (Avg Daily Ã Lead Time)</p>
-            <p style={{marginBottom:8}}><span style={{color:"#2563eb"}}>Order Qty</span> = CEIL(Net Req / Order Multiple) Ã OM, min MOQ</p>
+            <p style={{marginBottom:8}}><span style={{color:"#7c3aed"}}>Reorder Point</span> = Safety Stock + (Avg Daily ÃÂ Lead Time)</p>
+            <p style={{marginBottom:8}}><span style={{color:"#2563eb"}}>Order Qty</span> = CEIL(Net Req / Order Multiple) ÃÂ OM, min MOQ</p>
             <p style={{marginBottom:8}}><span style={{color:"#dc2626"}}>CRITICAL</span> = Projected stock &lt; 0 at horizon</p>
             <p style={{marginBottom:8}}><span style={{color:"#ea580c"}}>AT RISK</span> = Stock &lt; Safety Stock at horizon</p>
             <p style={{marginBottom:16}}><span style={{color:"#ca8a04"}}>WATCH</span> = Days cover &lt; Lead Time (weeks)</p>
@@ -666,9 +669,9 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
               <tr key={row.cat}>
                 <td style={{color:"#0f172a",fontWeight:600}}>{row.cat}</td>
                 <td>{row.total}</td>
-                <td style={{color:row.critical>0?"#dc2626":"#94a3b8"}}>{row.critical||"â"}</td>
-                <td style={{color:row["at-risk"]>0?"#ea580c":"#94a3b8"}}>{row["at-risk"]||"â"}</td>
-                <td style={{color:row.watch>0?"#ca8a04":"#94a3b8"}}>{row.watch||"â"}</td>
+                <td style={{color:row.critical>0?"#dc2626":"#94a3b8"}}>{row.critical||"Ã¢ÂÂ"}</td>
+                <td style={{color:row["at-risk"]>0?"#ea580c":"#94a3b8"}}>{row["at-risk"]||"Ã¢ÂÂ"}</td>
+                <td style={{color:row.watch>0?"#ca8a04":"#94a3b8"}}>{row.watch||"Ã¢ÂÂ"}</td>
                 <td style={{color:"#16a34a"}}>{row.ok}</td>
                 <td>{catParams[row.cat].leadTime}d</td>
                 <td>{catParams[row.cat].moq}</td>
@@ -687,7 +690,7 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
       {editCat&&(
         <div className="modal-overlay" onClick={()=>setEditCat(null)}>
           <div className="modal" onClick={e=>e.stopPropagation()}>
-            <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:20}}>Edit Category Defaults â {editCat}</div>
+            <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:20}}>Edit Category Defaults Ã¢ÂÂ {editCat}</div>
             {Object.entries(draft).map(([key,val])=>(
               <div key={key} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
                 <label style={{fontSize:12,color:"#94a3b8",textTransform:"uppercase",letterSpacing:"0.06em"}}>{key}</label>
@@ -706,7 +709,7 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
   );
 }
 
-// ââ PARAM MODAL âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ PARAM MODAL Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
   const cat=catParams[sku.category];
   const [draft,setDraft]=useState({
@@ -726,7 +729,7 @@ function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e=>e.stopPropagation()} style={{minWidth:460}}>
-        <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:4}}>SKU Parameters â {sku.id}</div>
+        <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:4}}>SKU Parameters Ã¢ÂÂ {sku.id}</div>
         <div style={{fontSize:11,color:"#94a3b8",marginBottom:20}}>Leave blank to inherit from category ({sku.category})</div>
         {fields.map(f=>(
           <div key={f.key} style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
@@ -754,3 +757,208 @@ function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
     </div>
   );
 }
+
+
+// ── DEMAND ANALYSIS VIEW ────────────────────────────────────────────────────
+function parseDemandCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  return lines.slice(1).filter(l => l.trim()).map(l => {
+    const vals = l.split(',').map(v => v.trim());
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = vals[i] ?? ''; });
+    return obj;
+  });
+}
+
+function calcDemandStats(rows) {
+  const MONTHS = [1,2,3,4,5,6,7,8,9,10,11,12];
+  return rows
+    .filter(r => r.sku || r.id)
+    .map(r => {
+      const sku = (r.sku || r.id || '').toUpperCase();
+      const desc = r.description || r.name || r.desc || '';
+      const vals = MONTHS.map(m => parseFloat(r['month'+m] || r['m'+m] || 0)).filter(v => !isNaN(v));
+      const n = vals.length || 1;
+      const total = vals.reduce((a, b) => a + b, 0);
+      const avg = total / 12;
+      const mean = total / n;
+      const variance = vals.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / n;
+      const stdDev = Math.sqrt(variance);
+      const months = MONTHS.map(m => parseFloat(r['month'+m] || r['m'+m] || 0));
+      return { sku, desc, months, total, avg, stdDev };
+    });
+}
+
+function assignABC(items) {
+  const sorted = [...items].sort((a, b) => b.total - a.total);
+  const grandTotal = sorted.reduce((s, i) => s + i.total, 0);
+  let cumulative = 0;
+  return sorted.map(item => {
+    cumulative += item.total;
+    const pct = grandTotal > 0 ? cumulative / grandTotal : 0;
+    const cls = pct <= 0.70 ? 'A' : pct <= 0.90 ? 'B' : 'C';
+    return { ...item, cumPct: pct, skuClass: cls };
+  });
+}
+
+function DemandView() {
+  const [rows, setRows] = useState([]);
+  const [msg, setMsg] = useState('');
+  const [search, setSearch] = useState('');
+  const [filterClass, setFilterClass] = useState('All');
+  const [sortCol, setSortCol] = useState('total');
+  const [sortDir, setSortDir] = useState('desc');
+  const fileRef = useRef();
+
+  const analyzed = useMemo(() => assignABC(calcDemandStats(rows)), [rows]);
+
+  const filtered = useMemo(() => {
+    let r = analyzed;
+    if (filterClass !== 'All') r = r.filter(x => x.skuClass === filterClass);
+    if (search) r = r.filter(x => x.sku.toLowerCase().includes(search.toLowerCase()) || x.desc.toLowerCase().includes(search.toLowerCase()));
+    return [...r].sort((a, b) => {
+      const av = a[sortCol] ?? 0, bv = b[sortCol] ?? 0;
+      return sortDir === 'asc' ? av - bv : bv - av;
+    });
+  }, [analyzed, filterClass, search, sortCol, sortDir]);
+
+  const counts = useMemo(() => ({
+    A: analyzed.filter(x => x.skuClass === 'A').length,
+    B: analyzed.filter(x => x.skuClass === 'B').length,
+    C: analyzed.filter(x => x.skuClass === 'C').length,
+    total: analyzed.length,
+  }), [analyzed]);
+
+  function handleUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed = parseDemandCSV(ev.target.result);
+        setRows(parsed);
+        setMsg('Loaded ' + parsed.length + ' rows from ' + file.name);
+      } catch(err) { setMsg('Parse error: ' + err.message); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  function handleExport() {
+    const MONTHS = [1,2,3,4,5,6,7,8,9,10,11,12];
+    const header = ['SKU','Description',...MONTHS.map(m=>'Month'+m),'Average','Std Deviation','SKU Class'].join(',');
+    const dataRows = filtered.map(r =>
+      [r.sku, '"'+r.desc+'"', ...r.months.map(v=>v.toFixed(2)), r.avg.toFixed(2), r.stdDev.toFixed(2), r.skuClass].join(',')
+    );
+    const csv = '\uFEFF' + [header, ...dataRows].join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='demand-analysis.csv'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function toggleSort(col) {
+    if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortCol(col); setSortDir('desc'); }
+  }
+
+  const MONTHS = [1,2,3,4,5,6,7,8,9,10,11,12];
+  const classBadge = { A:'#16a34a', B:'#2563eb', C:'#94a3b8' };
+  const classBg    = { A:'#dcfce7', B:'#dbeafe', C:'#f1f5f9' };
+
+  return (
+    <div>
+      {/* Toolbar */}
+      <div style={{display:'flex',gap:10,marginBottom:16,alignItems:'center',flexWrap:'wrap'}}>
+        <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{display:'none'}} onChange={handleUpload}/>
+        <button className="btn btn-primary" style={{fontSize:10,padding:'4px 12px'}} onClick={()=>fileRef.current.click()}>↑ Upload Demand CSV</button>
+        {analyzed.length>0&&<button className="btn btn-green" style={{fontSize:10,padding:'4px 12px'}} onClick={handleExport}>↓ Export Analysis</button>}
+        <input className="input" placeholder="Search SKU / description…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
+        <select className="select" value={filterClass} onChange={e=>setFilterClass(e.target.value)}>
+          <option value="All">All Classes</option>
+          <option value="A">Class A</option>
+          <option value="B">Class B</option>
+          <option value="C">Class C</option>
+        </select>
+        <span style={{marginLeft:'auto',fontSize:11,color:'#475569'}}>{filtered.length} SKUs</span>
+      </div>
+
+      {msg&&<div style={{background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:3,padding:'6px 14px',fontSize:11,color:'#2563eb',marginBottom:12,display:'flex',justifyContent:'space-between'}}>
+        <span>{msg}</span><button style={{background:'none',border:'none',cursor:'pointer',color:'#94a3b8'}} onClick={()=>setMsg('')}>✕</button>
+      </div>}
+
+      {/* KPI cards */}
+      {analyzed.length>0&&(
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:16}}>
+          {[
+            {label:'Total SKUs', val:counts.total, color:'#2563eb'},
+            {label:'Class A — top 70%', val:counts.A, color:'#16a34a'},
+            {label:'Class B — next 20%', val:counts.B, color:'#2563eb'},
+            {label:'Class C — last 10%', val:counts.C, color:'#94a3b8'},
+          ].map(k=>(
+            <div key={k.label} className="stat-card">
+              <div style={{fontSize:22,fontWeight:600,color:k.color,fontFamily:"'IBM Plex Sans',sans-serif"}}>{k.val}</div>
+              <div style={{fontSize:10,color:'#94a3b8',letterSpacing:'0.08em',textTransform:'uppercase',marginTop:2}}>{k.label}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {rows.length===0&&(
+        <div className="card" style={{padding:48,textAlign:'center'}}>
+          <div style={{fontSize:32,marginBottom:12}}>📊</div>
+          <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,fontSize:14,color:'#0f172a',marginBottom:8}}>Demand Analysis</div>
+          <div style={{color:'#64748b',fontSize:12,marginBottom:20}}>Upload a CSV with columns: SKU, Description, Month1 … Month12</div>
+          <div style={{background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:3,padding:'10px 16px',fontSize:10,fontFamily:'monospace',display:'inline-block',textAlign:'left'}}>
+            <div style={{color:'#94a3b8',marginBottom:4}}>Required columns:</div>
+            <div style={{color:'#334155'}}>sku, description, month1, month2, … month12</div>
+            <div style={{color:'#94a3b8',marginTop:6}}>ABC Classification:</div>
+            <div style={{color:'#16a34a'}}>A = SKUs representing top 70% of total qty</div>
+            <div style={{color:'#2563eb'}}>B = SKUs representing next 20% of total qty</div>
+            <div style={{color:'#94a3b8'}}>C = SKUs representing last 10% of total qty</div>
+          </div>
+        </div>
+      )}
+
+      {/* Main table */}
+      {rows.length>0&&(
+        <div className="card" style={{overflow:'auto'}}>
+          <table style={{minWidth:1400}}>
+            <thead>
+              <tr>
+                <th style={{minWidth:90}}>SKU</th>
+                <th style={{minWidth:180}}>Description</th>
+                {MONTHS.map(m=><th key={m} style={{textAlign:'right',minWidth:62,cursor:'pointer'}} onClick={()=>toggleSort('m'+m)}>M{m}</th>)}
+                <th style={{textAlign:'right',minWidth:80,cursor:'pointer',color:sortCol==='avg'?'#2563eb':'#94a3b8'}} onClick={()=>toggleSort('avg')}>Average {sortCol==='avg'?(sortDir==='desc'?'↓':'↑'):''}</th>
+                <th style={{textAlign:'right',minWidth:90,cursor:'pointer',color:sortCol==='stdDev'?'#2563eb':'#94a3b8'}} onClick={()=>toggleSort('stdDev')}>Std Dev {sortCol==='stdDev'?(sortDir==='desc'?'↓':'↑'):''}</th>
+                <th style={{textAlign:'right',minWidth:80,cursor:'pointer',color:sortCol==='total'?'#2563eb':'#94a3b8'}} onClick={()=>toggleSort('total')}>Total {sortCol==='total'?(sortDir==='desc'?'↓':'↑'):''}</th>
+                <th style={{textAlign:'center',minWidth:80,cursor:'pointer',color:sortCol==='skuClass'?'#2563eb':'#94a3b8'}} onClick={()=>toggleSort('skuClass')}>Class</th>
+                <th style={{textAlign:'right',minWidth:80}}>Cum %</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((r, idx) => (
+                <tr key={r.sku+idx} style={{background: idx%2===0?'transparent':'#fafafa'}}>
+                  <td style={{color:'#2563eb',fontWeight:600}}>{r.sku}</td>
+                  <td style={{color:'#0f172a',maxWidth:200,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.desc}</td>
+                  {r.months.map((v,i)=>(
+                    <td key={i} style={{textAlign:'right',color: v===0?'#cbd5e1':'#334155'}}>{v>0?v.toFixed(1):'—'}</td>
+                  ))}
+                  <td style={{textAlign:'right',fontWeight:600,color:'#0f172a'}}>{r.avg.toFixed(2)}</td>
+                  <td style={{textAlign:'right',color:'#7c3aed'}}>{r.stdDev.toFixed(2)}</td>
+                  <td style={{textAlign:'right',fontWeight:600}}>{r.total.toFixed(1)}</td>
+                  <td style={{textAlign:'center'}}>
+                    <span style={{display:'inline-block',padding:'2px 10px',borderRadius:2,fontSize:11,fontWeight:700,background:classBg[r.skuClass],color:classBadge[r.skuClass],letterSpacing:'0.05em'}}>{r.skuClass}</span>
+                  </td>
+                  <td style={{textAlign:'right',color:'#64748b',fontSize:11}}>{(r.cumPct*100).toFixed(1)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+          }
