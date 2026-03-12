@@ -270,7 +270,7 @@ export default function MRPPlanner() {
       .channel('mrp_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'mrp_skus' }, async () => {
         const { data } = await supabase.from('mrp_skus').select('*');
-        if (data?.length) setSkusRaw(dbSkusToApp(data));
+        if (data) setSkusRaw(dbSkusToApp(data));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'mrp_open_pos' }, async () => {
         const { data } = await supabase.from('mrp_open_pos').select('*');
@@ -282,7 +282,7 @@ export default function MRPPlanner() {
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'mrp_category_params' }, async () => {
         const { data } = await supabase.from('mrp_category_params').select('*');
-        if (data?.length) setCatParams(dbCatParamsToApp(data));
+        if (data) setCatParams(dbCatParamsToApp(data));
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -551,7 +551,7 @@ export default function MRPPlanner() {
             onEditParams={s=>setEditingParams(s)} catParams={catParams}/>
         )}
         {view==="detail"&&selectedSKU&&(
-          <DetailView sku={selectedSKU} mrp={mrpResults[selectedSKU.id]}
+          <DetailView sku={enriched.find(s=>s.id===selectedSKU.id)||selectedSKU} mrp={mrpResults[selectedSKU.id]}
             openPOs={openPOs[selectedSKU.id]||[]}
             onBack={()=>setView("workbench")} onEditParams={()=>setEditingParams(selectedSKU)}/>
         )}
