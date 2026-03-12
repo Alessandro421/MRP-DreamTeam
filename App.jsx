@@ -76,7 +76,7 @@ function calcMRP(sku, openPOs, horizon=90) {
 const STATUS_COLOR = { critical:"#ef4444","at-risk":"#f97316", watch:"#eab308", ok:"#22c55e" };
 const STATUS_LABEL = { critical:"CRITICAL","at-risk":"AT RISK", watch:"WATCH",   ok:"OK" };
 
-// ── CSV / XLSX helpers ────────────────────────────────────────────────────────
+// ââ CSV / XLSX helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const headers = lines[0].split(',').map(h=>h.trim().toLowerCase());
@@ -89,28 +89,52 @@ function parseCSV(text) {
 }
 
 function rowsToSkus(rows) {
-  return rows.filter(r=>r.id||r.sku).map(r=>({
-    id:       (r.id||r.sku||'').toUpperCase(),
-    name:     r.name||r.description||r.id||r.sku||'',
-    category: r.category||'Spare Parts',
-    stock:    parseFloat(r.stock||r['current stock']||0),
-    avgDaily: parseFloat(r.avgdaily||r['avg daily']||r['daily usage']||0),
-    overrides:{
-      ...(r.leadtime||r['lead time'] ? {leadTime:parseFloat(r.leadtime||r['lead time'])} : {}),
-      ...(r.moq ? {moq:parseFloat(r.moq)} : {}),
-      ...(r.ordermultiple||r['order multiple'] ? {orderMultiple:parseFloat(r.ordermultiple||r['order multiple'])} : {}),
-      ...(r.safetystock||r['safety stock'] ? {safetyStock:parseFloat(r.safetystock||r['safety stock'])} : {}),
-    }
-  }));
+  // Group rows by SKU id — aggregate: avg numeric fields, collect POs
+  const groups = {};
+  rows.filter(r => r.id || r.sku).forEach(r => {
+    const id = (r.id || r.sku || '').toUpperCase();
+    if (!groups[id]) groups[id] = [];
+    groups[id].push(r);
+  });
+  return Object.values(groups).map(grp => {
+    const first = grp[0];
+    const avgOr = (...keys) => {
+      for (const k of keys) {
+        const vals = grp.map(r => parseFloat(r[k] || 0)).filter(v => !isNaN(v) && v > 0);
+        if (vals.length) return vals.reduce((a, b) => a + b, 0) / vals.length;
+      }
+      return 0;
+    };
+    return {
+      id: (first.id || first.sku || '').toUpperCase(),
+      name: first.name || first.description || first.id || first.sku || '',
+      category: first.category || 'Spare Parts',
+      stock: avgOr('stock') || parseFloat(first['current stock'] || 0),
+      avgDaily: avgOr('avgdaily', 'avg daily', 'daily usage'),
+      overrides: {
+        ...(avgOr('leadtime', 'lead time') ? { leadTime: avgOr('leadtime', 'lead time') } : {}),
+        ...(avgOr('moq') ? { moq: avgOr('moq') } : {}),
+        ...(avgOr('ordermultiple', 'order multiple') ? { orderMultiple: avgOr('ordermultiple', 'order multiple') } : {}),
+        ...(avgOr('safetystock', 'safety stock') ? { safetyStock: avgOr('safetystock', 'safety stock') } : {}),
+      }
+    };
+  });
 }
-
 function rowsToPOs(rows) {
+  // Collect all PO rows per SKU id — sum quantities for the same eta day
   const pos = {};
-  rows.filter(r=>r.id||r.sku).forEach(r=>{
-    const id = (r.id||r.sku||'').toUpperCase();
-    if (!pos[id]) pos[id]=[];
-    if (r.poqty||r['po qty']||r.qty) {
-      pos[id].push({ qty:parseFloat(r.poqty||r['po qty']||r.qty||0), eta:parseFloat(r.eta||r['eta day']||0) });
+  rows.filter(r => r.id || r.sku).forEach(r => {
+    const id = (r.id || r.sku || '').toUpperCase();
+    if (!pos[id]) pos[id] = [];
+    const qty = parseFloat(r.poqty || r['po qty'] || r.qty || 0);
+    const eta = parseFloat(r.eta || r['eta day'] || 0);
+    if (qty > 0) {
+      const existing = pos[id].find(p => p.eta === eta);
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        pos[id].push({ qty, eta });
+      }
     }
   });
   return pos;
@@ -131,9 +155,9 @@ function downloadFile(content, filename, mimeType) {
   URL.revokeObjectURL(url);
 }
 
-// ── MAIN APP ─────────────────────────────────────────────────────────────────
+// ââ MAIN APP âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-// ── localStorage helpers ──────────────────────────────────────────────────────
+// ââ localStorage helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function loadLS(key, fallback) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
   catch { return fallback; }
@@ -187,7 +211,7 @@ export default function MRPPlanner() {
     return {cat,total:items.length,...counts};
   }), [enriched]);
 
-  // ── File upload handler ──
+  // ââ File upload handler ââ
   function handleUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -213,7 +237,7 @@ export default function MRPPlanner() {
           setOpenPOs(newPOs);
           setUploadMsg(prev=>prev+` + ${poCount} open POs`);
         }
-        if (!newSkus.length && !poCount) setUploadMsg('No valid SKU data found — check column headers.');
+        if (!newSkus.length && !poCount) setUploadMsg('No valid SKU data found â check column headers.');
       } catch(err) {
         setUploadMsg('Parse error: ' + err.message);
       }
@@ -222,7 +246,7 @@ export default function MRPPlanner() {
     e.target.value = '';
   }
 
-  // ── Download MRP results ──
+  // ââ Download MRP results ââ
   function downloadResults(fmt) {
     const rows = enriched.map(s=>({
       SKU:            s.id,
@@ -300,17 +324,17 @@ export default function MRPPlanner() {
           {/* Upload */}
           <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{display:"none"}} onChange={handleUpload}/>
           <button className="btn" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>fileRef.current.click()}>
-            ↑ Upload CSV/XLS
+            â Upload CSV/XLS
           </button>
           <button className="btn" style={{fontSize:10,padding:"4px 10px",color:"#94a3b8"}} onClick={()=>{
             if(confirm('Reset all data to defaults?')){
               ['mrp_catParams','mrp_skusRaw','mrp_openPOs','mrp_skuOverrides'].forEach(k=>localStorage.removeItem(k));
               window.location.reload();
             }
-          }}>↺ Reset</button>
+          }}>âº Reset</button>
           {/* Download */}
           <button className="btn btn-green" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>downloadResults('csv')}>
-            ↓ Export CSV
+            â Export CSV
           </button>
           <span className="tag">Horizon: 90d</span>
           <span className="tag">SKUs: {skusRaw.length}</span>
@@ -322,7 +346,7 @@ export default function MRPPlanner() {
       {uploadMsg&&(
         <div style={{background:"#eff6ff",borderBottom:"1px solid #bfdbfe",padding:"6px 24px",fontSize:11,color:"#2563eb",display:"flex",justifyContent:"space-between"}}>
           <span>{uploadMsg}</span>
-          <button style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:12}} onClick={()=>setUploadMsg('')}>✕</button>
+          <button style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:12}} onClick={()=>setUploadMsg('')}>â</button>
         </div>
       )}
       {/* KPI BAR */}
@@ -371,12 +395,12 @@ export default function MRPPlanner() {
   );
 }
 
-// ── WORKBENCH VIEW ────────────────────────────────────────────────────────────
+// ââ WORKBENCH VIEW ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterStatus,search,setSearch,openPOs,onOpenDetail,onEditParams}) {
   return (
     <div>
       <div style={{display:"flex",gap:10,marginBottom:16,alignItems:"center",flexWrap:"wrap"}}>
-        <input className="input" placeholder="Search SKU / name…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
+        <input className="input" placeholder="Search SKU / nameâ¦" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
         <select className="select" value={filterCat} onChange={e=>setFilterCat(e.target.value)}>
           <option>All</option>
           {CATEGORIES.map(c=><option key={c}>{c}</option>)}
@@ -418,9 +442,9 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
                   </td>
                   <td style={{color:"#94a3b8"}}>{s.leadTime}d</td>
                   <td style={{color:"#94a3b8"}}>{s.moq}</td>
-                  <td style={{color:totalOpen>0?"#7c3aed":"#94a3b8"}}>{totalOpen>0?totalOpen:"—"}</td>
+                  <td style={{color:totalOpen>0?"#7c3aed":"#94a3b8"}}>{totalOpen>0?totalOpen:"â"}</td>
                   <td style={{color:s.mrp.orders.length>0?"#2563eb":"#94a3b8"}}>
-                    {s.mrp.orders.length>0?`${s.mrp.orders.length} × ${s.mrp.orders[0]?.qty}`:"—"}
+                    {s.mrp.orders.length>0?`${s.mrp.orders.length} Ã ${s.mrp.orders[0]?.qty}`:"â"}
                   </td>
                   <td><span className={`pill badge-${status}`}>{STATUS_LABEL[status]}</span></td>
                   <td>
@@ -436,14 +460,14 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
   );
 }
 
-// ── DETAIL VIEW ───────────────────────────────────────────────────────────────
+// ââ DETAIL VIEW âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
   const chartData = mrp.curve.filter((_,i)=>i%3===0);
   const status = mrp.status;
   return (
     <div>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-        <button className="btn" onClick={onBack}>← Back</button>
+        <button className="btn" onClick={onBack}>â Back</button>
         <span style={{color:"#2563eb",fontWeight:600,fontSize:16}}>{sku.id}</span>
         <span style={{color:"#0f172a",fontSize:14}}>{sku.name}</span>
         <span className="tag">{sku.category}</span>
@@ -470,7 +494,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
       <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:16}}>
         <div className="card" style={{padding:20}}>
           <div style={{fontSize:11,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:16}}>
-            Projected Stock Curve — 90 Day Horizon
+            Projected Stock Curve â 90 Day Horizon
           </div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={chartData} margin={{top:5,right:20,bottom:5,left:0}}>
@@ -503,7 +527,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
               <div key={i} style={{padding:"8px 0",borderBottom:"1px solid #f1f5f9",fontSize:12}}>
                 <div style={{display:"flex",justifyContent:"space-between"}}>
                   <span style={{color:"#2563eb"}}>{o.qty} units</span>
-                  <span style={{color:"#16a34a",fontSize:10}}>MOQ✓</span>
+                  <span style={{color:"#16a34a",fontSize:10}}>MOQâ</span>
                 </div>
                 <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
                   <span style={{color:"#94a3b8",fontSize:10}}>Order Day {o.orderDay}</span>
@@ -527,7 +551,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
   );
 }
 
-// ── EXCEPTION VIEW ────────────────────────────────────────────────────────────
+// ââ EXCEPTION VIEW ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function ExceptionView({exceptions,onOpenDetail}) {
   return (
     <div>
@@ -536,8 +560,8 @@ function ExceptionView({exceptions,onOpenDetail}) {
       </div>
       {exceptions.length===0&&(
         <div className="card" style={{padding:40,textAlign:"center",color:"#16a34a"}}>
-          <div style={{fontSize:24,marginBottom:8}}>✓</div>
-          <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,color:"#0f172a"}}>No exceptions — all SKUs within parameters</div>
+          <div style={{fontSize:24,marginBottom:8}}>â</div>
+          <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,color:"#0f172a"}}>No exceptions â all SKUs within parameters</div>
         </div>
       )}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:12}}>
@@ -567,7 +591,7 @@ function ExceptionView({exceptions,onOpenDetail}) {
               </div>
               {s.mrp.orders.length>0&&(
                 <div style={{marginTop:10,fontSize:11,color:"#2563eb",background:"#eff6ff",border:"1px solid #bfdbfe",padding:"6px 10px",borderRadius:3}}>
-                  → {s.mrp.orders.length} planned order(s) · Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
+                  â {s.mrp.orders.length} planned order(s) Â· Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
                 </div>
               )}
             </div>
@@ -578,7 +602,7 @@ function ExceptionView({exceptions,onOpenDetail}) {
   );
 }
 
-// ── CATEGORY VIEW ─────────────────────────────────────────────────────────────
+// ââ CATEGORY VIEW âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function CategoryView({catSummary,catParams,setCatParams,enriched}) {
   const [editCat,setEditCat]=useState(null);
   const [draft,setDraft]=useState({});
@@ -614,8 +638,8 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
         <div className="card" style={{padding:20}}>
           <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Planning Logic & Upload Format</div>
           <div style={{fontSize:11,color:"#64748b",lineHeight:1.8}}>
-            <p style={{marginBottom:8}}><span style={{color:"#7c3aed"}}>Reorder Point</span> = Safety Stock + (Avg Daily × Lead Time)</p>
-            <p style={{marginBottom:8}}><span style={{color:"#2563eb"}}>Order Qty</span> = CEIL(Net Req / Order Multiple) × OM, min MOQ</p>
+            <p style={{marginBottom:8}}><span style={{color:"#7c3aed"}}>Reorder Point</span> = Safety Stock + (Avg Daily Ã Lead Time)</p>
+            <p style={{marginBottom:8}}><span style={{color:"#2563eb"}}>Order Qty</span> = CEIL(Net Req / Order Multiple) Ã OM, min MOQ</p>
             <p style={{marginBottom:8}}><span style={{color:"#dc2626"}}>CRITICAL</span> = Projected stock &lt; 0 at horizon</p>
             <p style={{marginBottom:8}}><span style={{color:"#ea580c"}}>AT RISK</span> = Stock &lt; Safety Stock at horizon</p>
             <p style={{marginBottom:16}}><span style={{color:"#ca8a04"}}>WATCH</span> = Days cover &lt; Lead Time (weeks)</p>
@@ -642,9 +666,9 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
               <tr key={row.cat}>
                 <td style={{color:"#0f172a",fontWeight:600}}>{row.cat}</td>
                 <td>{row.total}</td>
-                <td style={{color:row.critical>0?"#dc2626":"#94a3b8"}}>{row.critical||"—"}</td>
-                <td style={{color:row["at-risk"]>0?"#ea580c":"#94a3b8"}}>{row["at-risk"]||"—"}</td>
-                <td style={{color:row.watch>0?"#ca8a04":"#94a3b8"}}>{row.watch||"—"}</td>
+                <td style={{color:row.critical>0?"#dc2626":"#94a3b8"}}>{row.critical||"â"}</td>
+                <td style={{color:row["at-risk"]>0?"#ea580c":"#94a3b8"}}>{row["at-risk"]||"â"}</td>
+                <td style={{color:row.watch>0?"#ca8a04":"#94a3b8"}}>{row.watch||"â"}</td>
                 <td style={{color:"#16a34a"}}>{row.ok}</td>
                 <td>{catParams[row.cat].leadTime}d</td>
                 <td>{catParams[row.cat].moq}</td>
@@ -663,7 +687,7 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
       {editCat&&(
         <div className="modal-overlay" onClick={()=>setEditCat(null)}>
           <div className="modal" onClick={e=>e.stopPropagation()}>
-            <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:20}}>Edit Category Defaults — {editCat}</div>
+            <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:20}}>Edit Category Defaults â {editCat}</div>
             {Object.entries(draft).map(([key,val])=>(
               <div key={key} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
                 <label style={{fontSize:12,color:"#94a3b8",textTransform:"uppercase",letterSpacing:"0.06em"}}>{key}</label>
@@ -682,7 +706,7 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
   );
 }
 
-// ── PARAM MODAL ───────────────────────────────────────────────────────────────
+// ââ PARAM MODAL âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
   const cat=catParams[sku.category];
   const [draft,setDraft]=useState({
@@ -702,7 +726,7 @@ function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e=>e.stopPropagation()} style={{minWidth:460}}>
-        <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:4}}>SKU Parameters — {sku.id}</div>
+        <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:4}}>SKU Parameters â {sku.id}</div>
         <div style={{fontSize:11,color:"#94a3b8",marginBottom:20}}>Leave blank to inherit from category ({sku.category})</div>
         {fields.map(f=>(
           <div key={f.key} style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
