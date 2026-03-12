@@ -76,7 +76,7 @@ function calcMRP(sku, openPOs, horizon=90) {
 const STATUS_COLOR = { critical:"#ef4444","at-risk":"#f97316", watch:"#eab308", ok:"#22c55e" };
 const STATUS_LABEL = { critical:"CRITICAL","at-risk":"AT RISK", watch:"WATCH",   ok:"OK" };
 
-// ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ CSV / XLSX helpers ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+//  CSV / XLSX helpers 
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const headers = lines[0].split(',').map(h=>h.trim().toLowerCase());
@@ -89,7 +89,7 @@ function parseCSV(text) {
 }
 
 function rowsToSkus(rows) {
-  // Group rows by SKU id Ã¢ÂÂ aggregate: avg numeric fields, collect POs
+  // Group rows by SKU id  aggregate: avg numeric fields, collect POs
   const groups = {};
   rows.filter(r => r.id || r.sku).forEach(r => {
     const id = (r.id || r.sku || '').toUpperCase();
@@ -121,7 +121,7 @@ function rowsToSkus(rows) {
   });
 }
 function rowsToPOs(rows) {
-  // Collect all PO rows per SKU id Ã¢ÂÂ sum quantities for the same eta day
+  // Collect all PO rows per SKU id  sum quantities for the same eta day
   const pos = {};
   rows.filter(r => r.id || r.sku).forEach(r => {
     const id = (r.id || r.sku || '').toUpperCase();
@@ -155,9 +155,9 @@ function downloadFile(content, filename, mimeType) {
   URL.revokeObjectURL(url);
 }
 
-// ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ MAIN APP ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+//  MAIN APP 
 
-// ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ localStorage helpers ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+//  localStorage helpers 
 function loadLS(key, fallback) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
   catch { return fallback; }
@@ -211,7 +211,7 @@ export default function MRPPlanner() {
     return {cat,total:items.length,...counts};
   }), [enriched]);
 
-  // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ File upload handler ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+  //  File upload handler 
   function handleUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -237,7 +237,7 @@ export default function MRPPlanner() {
           setOpenPOs(newPOs);
           setUploadMsg(prev=>prev+` + ${poCount} open POs`);
         }
-        if (!newSkus.length && !poCount) setUploadMsg('No valid SKU data found ÃÂ¢ÃÂÃÂ check column headers.');
+        if (!newSkus.length && !poCount) setUploadMsg('No valid SKU data found  check column headers.');
       } catch(err) {
         setUploadMsg('Parse error: ' + err.message);
       }
@@ -246,7 +246,7 @@ export default function MRPPlanner() {
     e.target.value = '';
   }
 
-  // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Download MRP results ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+  //  Download MRP results 
   function downloadResults(fmt) {
     const rows = enriched.map(s=>({
       SKU:            s.id,
@@ -324,17 +324,17 @@ export default function MRPPlanner() {
           {/* Upload */}
           <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{display:"none"}} onChange={handleUpload}/>
           <button className="btn" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>fileRef.current.click()}>
-            ÃÂ¢ÃÂÃÂ Upload CSV/XLS
+            ↑ Upload CSV/XLS
           </button>
           <button className="btn" style={{fontSize:10,padding:"4px 10px",color:"#94a3b8"}} onClick={()=>{
             if(confirm('Reset all data to defaults?')){
               ['mrp_catParams','mrp_skusRaw','mrp_openPOs','mrp_skuOverrides'].forEach(k=>localStorage.removeItem(k));
               window.location.reload();
             }
-          }}>ÃÂ¢ÃÂÃÂº Reset</button>
+          }}>↺ Reset</button>
           {/* Download */}
           <button className="btn btn-green" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>downloadResults('csv')}>
-            ÃÂ¢ÃÂÃÂ Export CSV
+            ↓ Export CSV
           </button>
           <span className="tag">Horizon: 90d</span>
           <span className="tag">SKUs: {skusRaw.length}</span>
@@ -346,7 +346,7 @@ export default function MRPPlanner() {
       {uploadMsg&&(
         <div style={{background:"#eff6ff",borderBottom:"1px solid #bfdbfe",padding:"6px 24px",fontSize:11,color:"#2563eb",display:"flex",justifyContent:"space-between"}}>
           <span>{uploadMsg}</span>
-          <button style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:12}} onClick={()=>setUploadMsg('')}>ÃÂ¢ÃÂÃÂ</button>
+          <button style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:12}} onClick={()=>setUploadMsg('')}></button>
         </div>
       )}
       {/* KPI BAR */}
@@ -398,12 +398,12 @@ export default function MRPPlanner() {
   );
 }
 
-// ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ WORKBENCH VIEW ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+//  WORKBENCH VIEW 
 function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterStatus,search,setSearch,openPOs,onOpenDetail,onEditParams}) {
   return (
     <div>
       <div style={{display:"flex",gap:10,marginBottom:16,alignItems:"center",flexWrap:"wrap"}}>
-        <input className="input" placeholder="Search SKU / nameÃÂ¢ÃÂÃÂ¦" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
+        <input className="input" placeholder="Search SKU / name&" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
         <select className="select" value={filterCat} onChange={e=>setFilterCat(e.target.value)}>
           <option>All</option>
           {CATEGORIES.map(c=><option key={c}>{c}</option>)}
@@ -445,9 +445,9 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
                   </td>
                   <td style={{color:"#94a3b8"}}>{s.leadTime}d</td>
                   <td style={{color:"#94a3b8"}}>{s.moq}</td>
-                  <td style={{color:totalOpen>0?"#7c3aed":"#94a3b8"}}>{totalOpen>0?totalOpen:"ÃÂ¢ÃÂÃÂ"}</td>
+                  <td style={{color:totalOpen>0?"#7c3aed":"#94a3b8"}}>{totalOpen>0?totalOpen:""}</td>
                   <td style={{color:s.mrp.orders.length>0?"#2563eb":"#94a3b8"}}>
-                    {s.mrp.orders.length>0?`${s.mrp.orders.length} ÃÂÃÂ ${s.mrp.orders[0]?.qty}`:"ÃÂ¢ÃÂÃÂ"}
+                    {s.mrp.orders.length>0?`${s.mrp.orders.length} × ${s.mrp.orders[0]?.qty}`:""}
                   </td>
                   <td><span className={`pill badge-${status}`}>{STATUS_LABEL[status]}</span></td>
                   <td>
@@ -463,14 +463,14 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
   );
 }
 
-// ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ DETAIL VIEW ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+//  DETAIL VIEW 
 function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
   const chartData = mrp.curve.filter((_,i)=>i%3===0);
   const status = mrp.status;
   return (
     <div>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-        <button className="btn" onClick={onBack}>ÃÂ¢ÃÂÃÂ Back</button>
+        <button className="btn" onClick={onBack}>← Back</button>
         <span style={{color:"#2563eb",fontWeight:600,fontSize:16}}>{sku.id}</span>
         <span style={{color:"#0f172a",fontSize:14}}>{sku.name}</span>
         <span className="tag">{sku.category}</span>
@@ -497,7 +497,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
       <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:16}}>
         <div className="card" style={{padding:20}}>
           <div style={{fontSize:11,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:16}}>
-            Projected Stock Curve ÃÂ¢ÃÂÃÂ 90 Day Horizon
+            Projected Stock Curve  90 Day Horizon
           </div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={chartData} margin={{top:5,right:20,bottom:5,left:0}}>
@@ -530,7 +530,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
               <div key={i} style={{padding:"8px 0",borderBottom:"1px solid #f1f5f9",fontSize:12}}>
                 <div style={{display:"flex",justifyContent:"space-between"}}>
                   <span style={{color:"#2563eb"}}>{o.qty} units</span>
-                  <span style={{color:"#16a34a",fontSize:10}}>MOQÃÂ¢ÃÂÃÂ</span>
+                  <span style={{color:"#16a34a",fontSize:10}}>MOQ</span>
                 </div>
                 <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
                   <span style={{color:"#94a3b8",fontSize:10}}>Order Day {o.orderDay}</span>
@@ -554,7 +554,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
   );
 }
 
-// ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ EXCEPTION VIEW ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+//  EXCEPTION VIEW 
 function ExceptionView({exceptions,onOpenDetail}) {
   return (
     <div>
@@ -563,8 +563,8 @@ function ExceptionView({exceptions,onOpenDetail}) {
       </div>
       {exceptions.length===0&&(
         <div className="card" style={{padding:40,textAlign:"center",color:"#16a34a"}}>
-          <div style={{fontSize:24,marginBottom:8}}>ÃÂ¢ÃÂÃÂ</div>
-          <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,color:"#0f172a"}}>No exceptions ÃÂ¢ÃÂÃÂ all SKUs within parameters</div>
+          <div style={{fontSize:24,marginBottom:8}}></div>
+          <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,color:"#0f172a"}}>No exceptions  all SKUs within parameters</div>
         </div>
       )}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:12}}>
@@ -594,7 +594,7 @@ function ExceptionView({exceptions,onOpenDetail}) {
               </div>
               {s.mrp.orders.length>0&&(
                 <div style={{marginTop:10,fontSize:11,color:"#2563eb",background:"#eff6ff",border:"1px solid #bfdbfe",padding:"6px 10px",borderRadius:3}}>
-                  ÃÂ¢ÃÂÃÂ {s.mrp.orders.length} planned order(s) ÃÂÃÂ· Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
+                  → {s.mrp.orders.length} planned order(s) · Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
                 </div>
               )}
             </div>
@@ -605,7 +605,7 @@ function ExceptionView({exceptions,onOpenDetail}) {
   );
 }
 
-// ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ CATEGORY VIEW ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+//  CATEGORY VIEW 
 function CategoryView({catSummary,catParams,setCatParams,enriched}) {
   const [editCat,setEditCat]=useState(null);
   const [draft,setDraft]=useState({});
@@ -641,8 +641,8 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
         <div className="card" style={{padding:20}}>
           <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Planning Logic & Upload Format</div>
           <div style={{fontSize:11,color:"#64748b",lineHeight:1.8}}>
-            <p style={{marginBottom:8}}><span style={{color:"#7c3aed"}}>Reorder Point</span> = Safety Stock + (Avg Daily ÃÂÃÂ Lead Time)</p>
-            <p style={{marginBottom:8}}><span style={{color:"#2563eb"}}>Order Qty</span> = CEIL(Net Req / Order Multiple) ÃÂÃÂ OM, min MOQ</p>
+            <p style={{marginBottom:8}}><span style={{color:"#7c3aed"}}>Reorder Point</span> = Safety Stock + (Avg Daily × Lead Time)</p>
+            <p style={{marginBottom:8}}><span style={{color:"#2563eb"}}>Order Qty</span> = CEIL(Net Req / Order Multiple) × OM, min MOQ</p>
             <p style={{marginBottom:8}}><span style={{color:"#dc2626"}}>CRITICAL</span> = Projected stock &lt; 0 at horizon</p>
             <p style={{marginBottom:8}}><span style={{color:"#ea580c"}}>AT RISK</span> = Stock &lt; Safety Stock at horizon</p>
             <p style={{marginBottom:16}}><span style={{color:"#ca8a04"}}>WATCH</span> = Days cover &lt; Lead Time (weeks)</p>
@@ -669,9 +669,9 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
               <tr key={row.cat}>
                 <td style={{color:"#0f172a",fontWeight:600}}>{row.cat}</td>
                 <td>{row.total}</td>
-                <td style={{color:row.critical>0?"#dc2626":"#94a3b8"}}>{row.critical||"ÃÂ¢ÃÂÃÂ"}</td>
-                <td style={{color:row["at-risk"]>0?"#ea580c":"#94a3b8"}}>{row["at-risk"]||"ÃÂ¢ÃÂÃÂ"}</td>
-                <td style={{color:row.watch>0?"#ca8a04":"#94a3b8"}}>{row.watch||"ÃÂ¢ÃÂÃÂ"}</td>
+                <td style={{color:row.critical>0?"#dc2626":"#94a3b8"}}>{row.critical||""}</td>
+                <td style={{color:row["at-risk"]>0?"#ea580c":"#94a3b8"}}>{row["at-risk"]||""}</td>
+                <td style={{color:row.watch>0?"#ca8a04":"#94a3b8"}}>{row.watch||""}</td>
                 <td style={{color:"#16a34a"}}>{row.ok}</td>
                 <td>{catParams[row.cat].leadTime}d</td>
                 <td>{catParams[row.cat].moq}</td>
@@ -690,7 +690,7 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
       {editCat&&(
         <div className="modal-overlay" onClick={()=>setEditCat(null)}>
           <div className="modal" onClick={e=>e.stopPropagation()}>
-            <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:20}}>Edit Category Defaults ÃÂ¢ÃÂÃÂ {editCat}</div>
+            <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:20}}>Edit Category Defaults  {editCat}</div>
             {Object.entries(draft).map(([key,val])=>(
               <div key={key} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
                 <label style={{fontSize:12,color:"#94a3b8",textTransform:"uppercase",letterSpacing:"0.06em"}}>{key}</label>
@@ -709,7 +709,7 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
   );
 }
 
-// ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ PARAM MODAL ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+//  PARAM MODAL 
 function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
   const cat=catParams[sku.category];
   const [draft,setDraft]=useState({
@@ -729,7 +729,7 @@ function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e=>e.stopPropagation()} style={{minWidth:460}}>
-        <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:4}}>SKU Parameters ÃÂ¢ÃÂÃÂ {sku.id}</div>
+        <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:4}}>SKU Parameters  {sku.id}</div>
         <div style={{fontSize:11,color:"#94a3b8",marginBottom:20}}>Leave blank to inherit from category ({sku.category})</div>
         {fields.map(f=>(
           <div key={f.key} style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
@@ -760,7 +760,7 @@ function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
 
 
 
-// ── DEMAND ANALYSIS VIEW ────────────────────────────────────────────────────────────────────────────
+//  DEMAND ANALYSIS VIEW 
 function parseDemandCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
@@ -888,36 +888,36 @@ function DemandView() {
         <input ref={demandFileRef} type="file" accept=".csv,.tsv,.txt" style={{display:'none'}} onChange={handleDemandUpload}/>
         <input ref={masterFileRef} type="file" accept=".csv,.tsv,.txt" style={{display:'none'}} onChange={handleMasterUpload}/>
         <button className="btn btn-primary" style={{fontSize:10,padding:'4px 12px'}} onClick={()=>demandFileRef.current.click()}>↑ Demand CSV</button>
-        <button className={hasMaster?'btn btn-green':'btn'} style={{fontSize:10,padding:'4px 12px'}} onClick={()=>masterFileRef.current.click()}>↑ Master Data {hasMaster?'✓':''}</button>
+        <button className={hasMaster?'btn btn-green':'btn'} style={{fontSize:10,padding:'4px 12px'}} onClick={()=>masterFileRef.current.click()}>↑ Master Data {hasMaster?'':''}</button>
         {analyzed.length>0&&<button className="btn btn-green" style={{fontSize:10,padding:'4px 12px'}} onClick={handleExport}>↓ Export</button>}
-        <input className="input" placeholder="Search…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:200}}/>
+        <input className="input" placeholder="Search&" value={search} onChange={e=>setSearch(e.target.value)} style={{width:200}}/>
         <select className="select" value={filterClass} onChange={e=>setFilterClass(e.target.value)}>
           <option value="All">All Classes</option><option value="A">Class A</option><option value="B">Class B</option><option value="C">Class C</option>
         </select>
         <span style={{marginLeft:'auto',fontSize:11,color:'#475569'}}>{filtered.length} SKUs</span>
       </div>
-      {demandMsg&&<div style={{background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:3,padding:'5px 12px',fontSize:11,color:'#2563eb',marginBottom:6,display:'flex',justifyContent:'space-between'}}><span>📄 {demandMsg}</span><button style={{background:'none',border:'none',cursor:'pointer',color:'#94a3b8'}} onClick={()=>setDemandMsg('')}>✕</button></div>}
-      {masterMsg&&<div style={{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:3,padding:'5px 12px',fontSize:11,color:'#16a34a',marginBottom:6,display:'flex',justifyContent:'space-between'}}><span>📂 {masterMsg}</span><button style={{background:'none',border:'none',cursor:'pointer',color:'#94a3b8'}} onClick={()=>setMasterMsg('')}>✕</button></div>}
-      {!hasMaster&&rows.length>0&&<div style={{background:'#fffbeb',border:'1px solid #fde68a',borderRadius:3,padding:'7px 14px',fontSize:11,color:'#92400e',marginBottom:10}}>⚠️ Upload <strong>Master Data CSV</strong> to compute Safety Stock and ROP &nbsp;<span style={{fontFamily:'monospace',fontSize:10,color:'#78350f'}}>sku, lt, moq, multiplelot</span></div>}
+      {demandMsg&&<div style={{background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:3,padding:'5px 12px',fontSize:11,color:'#2563eb',marginBottom:6,display:'flex',justifyContent:'space-between'}}><span>=✕ {demandMsg}</span><button style={{background:'none',border:'none',cursor:'pointer',color:'#94a3b8'}} onClick={()=>setDemandMsg('')}></button></div>}
+      {masterMsg&&<div style={{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:3,padding:'5px 12px',fontSize:11,color:'#16a34a',marginBottom:6,display:'flex',justifyContent:'space-between'}}><span>=✕ {masterMsg}</span><button style={{background:'none',border:'none',cursor:'pointer',color:'#94a3b8'}} onClick={()=>setMasterMsg('')}></button></div>}
+      {!hasMaster&&rows.length>0&&<div style={{background:'#fffbeb',border:'1px solid #fde68a',borderRadius:3,padding:'7px 14px',fontSize:11,color:'#92400e',marginBottom:10}}>⚠ Upload <strong>Master Data CSV</strong> to compute Safety Stock and ROP &nbsp;<span style={{fontFamily:'monospace',fontSize:10,color:'#78350f'}}>sku, lt, moq, multiplelot</span></div>}
       {analyzed.length>0&&(
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:16}}>
-          {[{label:'Total SKUs',val:counts.total,color:'#2563eb'},{label:'Class A — Z=1.88',val:counts.A,color:'#16a34a'},{label:'Class B — Z=1.64',val:counts.B,color:'#2563eb'},{label:'Class C — Z=1.28',val:counts.C,color:'#94a3b8'}].map(k=>(
+          {[{label:'Total SKUs',val:counts.total,color:'#2563eb'},{label:'Class A  Z=1.88',val:counts.A,color:'#16a34a'},{label:'Class B  Z=1.64',val:counts.B,color:'#2563eb'},{label:'Class C  Z=1.28',val:counts.C,color:'#94a3b8'}].map(k=>(
             <div key={k.label} className="stat-card"><div style={{fontSize:22,fontWeight:600,color:k.color,fontFamily:"'IBM Plex Sans',sans-serif"}}>{k.val}</div><div style={{fontSize:10,color:'#94a3b8',letterSpacing:'0.08em',textTransform:'uppercase',marginTop:2}}>{k.label}</div></div>
           ))}
         </div>
       )}
       {rows.length===0&&(
         <div className="card" style={{padding:48,textAlign:'center'}}>
-          <div style={{fontSize:32,marginBottom:12}}>📊</div>
+          <div style={{fontSize:32,marginBottom:12}}>=📊</div>
           <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,fontSize:14,color:'#0f172a',marginBottom:8}}>Demand Analysis</div>
           <div style={{display:'flex',gap:20,justifyContent:'center',flexWrap:'wrap',marginTop:16}}>
-            <div style={{background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:3,padding:'12px 18px',fontSize:10,fontFamily:'monospace',textAlign:'left'}}><div style={{color:'#2563eb',marginBottom:4,fontWeight:600}}>DemandTable.csv</div><div>sku, description, month1 … month12</div></div>
+            <div style={{background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:3,padding:'12px 18px',fontSize:10,fontFamily:'monospace',textAlign:'left'}}><div style={{color:'#2563eb',marginBottom:4,fontWeight:600}}>DemandTable.csv</div><div>sku, description, month1 & month12</div></div>
             <div style={{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:3,padding:'12px 18px',fontSize:10,fontFamily:'monospace',textAlign:'left'}}><div style={{color:'#16a34a',marginBottom:4,fontWeight:600}}>MasterDataTable.csv</div><div>sku, description, lt, moq, multiplelot</div></div>
           </div>
           <div style={{marginTop:16,background:'#f5f3ff',border:'1px solid #ddd6fe',borderRadius:3,padding:'10px 16px',fontSize:10,fontFamily:'monospace',display:'inline-block',textAlign:'left'}}>
             <div style={{color:'#7c3aed',marginBottom:4,fontWeight:600}}>Formulas:</div>
             <div>A → Z=1.88 | B → Z=1.64 | C → Z=1.28</div>
-            <div>Safety Stock = Z × StdDev × √LT</div>
+            <div>Safety Stock = Z × StdDev √LT</div>
             <div>ROP = Average × LT + Safety Stock</div>
           </div>
         </div>
@@ -948,18 +948,18 @@ function DemandView() {
                 <tr key={r.sku+i} style={{background:i%2===0?'transparent':'#fafafa'}}>
                   <td style={{color:'#2563eb',fontWeight:600}}>{r.sku}</td>
                   <td style={{color:'#0f172a',maxWidth:150,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.desc}</td>
-                  {r.months.map((v,mi)=><td key={mi} style={{textAlign:'right',color:v===0?'#cbd5e1':'#334155',fontSize:11}}>{v>0?v.toFixed(1):'—'}</td>)}
+                  {r.months.map((v,mi)=><td key={mi} style={{textAlign:'right',color:v===0?'#cbd5e1':'#334155',fontSize:11}}>{v>0?v.toFixed(1):''}</td>)}
                   <td style={{textAlign:'right',fontWeight:600}}>{r.avg.toFixed(2)}</td>
                   <td style={{textAlign:'right',color:'#7c3aed'}}>{r.stdDev.toFixed(2)}</td>
                   <td style={{textAlign:'right',fontWeight:600}}>{r.total.toFixed(1)}</td>
                   <td style={{textAlign:'center'}}><span style={{display:'inline-block',padding:'2px 10px',borderRadius:2,fontSize:11,fontWeight:700,background:BG[r.skuClass],color:CB[r.skuClass]}}>{r.skuClass}</span></td>
                   <td style={{textAlign:'center',fontWeight:600,color:CB[r.skuClass]}}>{r.z.toFixed(2)}</td>
                   {hasMaster&&<>
-                    <td style={{textAlign:'right',color:'#64748b'}}>{r.lt||'—'}</td>
-                    <td style={{textAlign:'right',color:'#64748b'}}>{r.moq||'—'}</td>
-                    <td style={{textAlign:'right',color:'#64748b'}}>{r.multipleLot||'—'}</td>
-                    <td style={{textAlign:'right',fontWeight:600,color:'#7c3aed'}}>{r.safetyStock!=null?r.safetyStock.toFixed(2):'—'}</td>
-                    <td style={{textAlign:'right',fontWeight:600,color:'#7c3aed'}}>{r.rop!=null?r.rop.toFixed(2):'—'}</td>
+                    <td style={{textAlign:'right',color:'#64748b'}}>{r.lt||''}</td>
+                    <td style={{textAlign:'right',color:'#64748b'}}>{r.moq||''}</td>
+                    <td style={{textAlign:'right',color:'#64748b'}}>{r.multipleLot||''}</td>
+                    <td style={{textAlign:'right',fontWeight:600,color:'#7c3aed'}}>{r.safetyStock!=null?r.safetyStock.toFixed(2):''}</td>
+                    <td style={{textAlign:'right',fontWeight:600,color:'#7c3aed'}}>{r.rop!=null?r.rop.toFixed(2):''}</td>
                   </>}
                   <td style={{textAlign:'right',color:'#64748b',fontSize:11}}>{(r.cumPct*100).toFixed(1)}%</td>
                 </tr>
