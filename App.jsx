@@ -579,6 +579,11 @@ export default function MRPPlanner() {
 //  WORKBENCH VIEW (unchanged)
 // ─────────────────────────────────────────────
 function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterStatus,search,setSearch,openPOs,onOpenDetail,onEditParams}) {
+  const PAGE_SIZE = 50;
+  const [page, setPage] = useState(1);
+  useEffect(()=>{setPage(1);},[filterCat,filterStatus,search]);
+  const totalPages = Math.max(1, Math.ceil(enriched.length / PAGE_SIZE));
+  const paged = enriched.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
   return (
     <div>
       <div style={{display:"flex",gap:10,marginBottom:16,alignItems:"center",flexWrap:"wrap"}}>
@@ -606,7 +611,7 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
             </tr>
           </thead>
           <tbody>
-            {enriched.map(s=>{
+            {paged.map(s=>{
               const pos = openPOs[s.id]||[];
               const totalOpen = pos.reduce((sum,p)=>sum+p.qty,0);
               const status = s.mrp.status;
@@ -616,15 +621,15 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
                   <td><span style={{color:"#2563eb",fontWeight:600}}>{s.id}</span></td>
                   <td style={{color:"#0f172a",maxWidth:180}}>{s.name}</td>
                   <td><span className="tag">{s.category}</span></td>
-                  <td style={{color:s.stock<s.safetyStock?"#dc2626":"#334155"}}>{s.stock}</td>
-                  <td style={{color:"#94a3b8"}}>{s.safetyStock}</td>
-                  <td style={{color:"#7c3aed",fontWeight:500}}>{Math.round(s.mrp.rop)}</td>
+                  <td style={{color:s.stock<s.safetyStock?"#dc2626":"#334155"}}>{Math.floor(s.stock)}</td>
+                  <td style={{color:"#94a3b8"}}>{Math.floor(s.safetyStock)}</td>
+                  <td style={{color:"#7c3aed",fontWeight:500}}>{Math.floor(s.mrp.rop)}</td>
                   <td style={{color:s.mrp.daysOfStock<s.leadTime/7?"#ea580c":"#334155"}}>
-                    {s.mrp.daysOfStock>0?Math.round(s.mrp.daysOfStock)+"d":<span style={{color:"#dc2626"}}>STOCKOUT</span>}
+                    {s.mrp.daysOfStock>0?Math.floor(s.mrp.daysOfStock)+"d":<span style={{color:"#dc2626"}}>STOCKOUT</span>}
                   </td>
                   <td style={{color:"#94a3b8"}}>{s.leadTime}d</td>
                   <td style={{color:"#94a3b8"}}>{s.moq}</td>
-                  <td style={{color:totalOpen>0?"#7c3aed":"#94a3b8"}}>{totalOpen>0?totalOpen:""}</td>
+                  <td style={{color:totalOpen>0?"#7c3aed":"#94a3b8"}}>{totalOpen>0?Math.floor(totalOpen):""}</td>
                   <td style={{color:s.mrp.orders.length>0?"#2563eb":"#94a3b8"}}>
                     {s.mrp.orders.length>0?`${s.mrp.orders.length} × ${s.mrp.orders[0]?.qty}`:""}
                   </td>
@@ -637,6 +642,18 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
             })}
           </tbody>
         </table>
+        {totalPages>1&&(
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderTop:"1px solid #e2e8f0",background:"#f8fafc"}}>
+            <span style={{fontSize:11,color:"#64748b"}}>
+              {(page-1)*PAGE_SIZE+1}–{Math.min(page*PAGE_SIZE,enriched.length)} di {enriched.length} SKU
+            </span>
+            <div style={{display:"flex",gap:4,alignItems:"center"}}>
+              <button className="btn" style={{padding:"3px 10px",fontSize:11}} disabled={page===1} onClick={()=>setPage(p=>p-1)}>‹ Prec</button>
+              <span style={{padding:"3px 10px",fontSize:11,color:"#334155"}}>{page} / {totalPages}</span>
+              <button className="btn" style={{padding:"3px 10px",fontSize:11}} disabled={page===totalPages} onClick={()=>setPage(p=>p+1)}>Succ ›</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -660,12 +677,12 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:12,marginBottom:20}}>
         {[
-          {label:"Current Stock",  val:sku.stock,           unit:"units", highlight:sku.stock<sku.safetyStock},
-          {label:"Safety Stock",   val:sku.safetyStock,     unit:"units"},
-          {label:"Reorder Point",  val:Math.round(mrp.rop), unit:"units", highlight:sku.stock<=mrp.rop, color:"#7c3aed"},
-          {label:"Days of Cover",  val:mrp.daysOfStock>0?Math.round(mrp.daysOfStock):"STCKOUT", unit:mrp.daysOfStock>0?"days":"", highlight:mrp.daysOfStock<sku.leadTime/7},
+          {label:"Current Stock",  val:Math.floor(sku.stock),           unit:"units", highlight:sku.stock<sku.safetyStock},
+          {label:"Safety Stock",   val:Math.floor(sku.safetyStock),     unit:"units"},
+          {label:"Reorder Point",  val:Math.floor(mrp.rop), unit:"units", highlight:sku.stock<=mrp.rop, color:"#7c3aed"},
+          {label:"Days of Cover",  val:mrp.daysOfStock>0?Math.floor(mrp.daysOfStock):"STCKOUT", unit:mrp.daysOfStock>0?"days":"", highlight:mrp.daysOfStock<sku.leadTime/7},
           {label:"Lead Time",      val:sku.leadTime,        unit:"days"},
-          {label:"Avg Daily Use",  val:sku.avgDaily,        unit:"units/day"},
+          {label:"Avg Daily Use",  val:Math.floor(sku.avgDaily),        unit:"units/day"},
         ].map(k=>(
           <div key={k.label} className="stat-card">
             <div style={{fontSize:20,fontWeight:600,color:k.color||(k.highlight?"#dc2626":"#0f172a"),fontFamily:"'IBM Plex Sans',sans-serif"}}>
@@ -764,10 +781,10 @@ function ExceptionView({exceptions,onOpenDetail}) {
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8}}>
                 {[
-                  {l:"Stock",  v:s.stock,                warn:s.stock<s.safetyStock},
-                  {l:"Safety", v:s.safetyStock},
-                  {l:"ROP",    v:Math.round(s.mrp.rop),  color:"#7c3aed"},
-                  {l:"Cover",  v:s.mrp.daysOfStock>0?Math.round(s.mrp.daysOfStock)+"d":"OUT", warn:true},
+                  {l:"Stock",  v:Math.floor(s.stock),                warn:s.stock<s.safetyStock},
+                  {l:"Safety", v:Math.floor(s.safetyStock)},
+                  {l:"ROP",    v:Math.floor(s.mrp.rop),  color:"#7c3aed"},
+                  {l:"Cover",  v:s.mrp.daysOfStock>0?Math.floor(s.mrp.daysOfStock)+"d":"OUT", warn:true},
                 ].map(k=>(
                   <div key={k.l} style={{background:"#f8fafc",border:"1px solid #e2e8f0",padding:"8px 10px",borderRadius:3}}>
                     <div style={{fontSize:16,fontWeight:600,color:k.color||(k.warn?STATUS_COLOR[status]:"#0f172a"),fontFamily:"'IBM Plex Sans',sans-serif"}}>{k.v}</div>
@@ -1018,6 +1035,8 @@ function DemandView() {
   const [filterClass, setFilterClass] = useState('All');
   const [sortCol, setSortCol] = useState('total');
   const [sortDir, setSortDir] = useState('desc');
+  const [demandPage, setDemandPage] = useState(1);
+  const DEMAND_PAGE_SIZE = 50;
   const demandFileRef = useRef();
   const masterFileRef = useRef();
   const hasMaster = Object.keys(masterMap).length > 0;
@@ -1041,6 +1060,9 @@ function DemandView() {
     C: analyzed.filter(x => x.skuClass === 'C').length,
     total: analyzed.length,
   }), [analyzed]);
+  useEffect(()=>{setDemandPage(1);},[filterClass,search,sortCol,sortDir]);
+  const totalDemandPages = Math.max(1, Math.ceil(filtered.length / DEMAND_PAGE_SIZE));
+  const pagedFiltered = filtered.slice((demandPage-1)*DEMAND_PAGE_SIZE, demandPage*DEMAND_PAGE_SIZE);
   function handleDemandUpload(e) {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
@@ -1122,28 +1144,40 @@ function DemandView() {
               <th style={{textAlign:'right',minWidth:65}}>Cum %</th>
             </tr></thead>
             <tbody>
-              {filtered.map((r,i)=>(
+              {pagedFiltered.map((r,i)=>(
                 <tr key={r.sku+i} style={{background:i%2===0?'transparent':'#fafafa'}}>
                   <td style={{color:'#2563eb',fontWeight:600}}>{r.sku}</td>
                   <td style={{color:'#0f172a',maxWidth:150,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.desc}</td>
-                  {r.months.map((v,mi)=><td key={mi} style={{textAlign:'right',color:v===0?'#cbd5e1':'#334155',fontSize:11}}>{v>0?v.toFixed(1):''}</td>)}
-                  <td style={{textAlign:'right',fontWeight:600}}>{r.avg.toFixed(2)}</td>
-                  <td style={{textAlign:'right',color:'#7c3aed'}}>{r.stdDev.toFixed(2)}</td>
-                  <td style={{textAlign:'right',fontWeight:600}}>{r.total.toFixed(1)}</td>
+                  {r.months.map((v,mi)=><td key={mi} style={{textAlign:'right',color:v===0?'#cbd5e1':'#334155',fontSize:11}}>{v>0?Math.floor(v):''}</td>)}
+                  <td style={{textAlign:'right',fontWeight:600}}>{Math.floor(r.avg)}</td>
+                  <td style={{textAlign:'right',color:'#7c3aed'}}>{Math.floor(r.stdDev)}</td>
+                  <td style={{textAlign:'right',fontWeight:600}}>{Math.floor(r.total)}</td>
                   <td style={{textAlign:'center'}}><span style={{display:'inline-block',padding:'2px 10px',borderRadius:2,fontSize:11,fontWeight:700,background:BG[r.skuClass],color:CB[r.skuClass]}}>{r.skuClass}</span></td>
                   <td style={{textAlign:'center',fontWeight:600,color:CB[r.skuClass]}}>{r.z.toFixed(2)}</td>
                   {hasMaster&&<>
                     <td style={{textAlign:'right',color:'#64748b'}}>{r.lt||''}</td>
                     <td style={{textAlign:'right',color:'#64748b'}}>{r.moq||''}</td>
                     <td style={{textAlign:'right',color:'#64748b'}}>{r.multipleLot||''}</td>
-                    <td style={{textAlign:'right',fontWeight:600,color:'#7c3aed'}}>{r.safetyStock!=null?r.safetyStock.toFixed(2):''}</td>
-                    <td style={{textAlign:'right',fontWeight:600,color:'#7c3aed'}}>{r.rop!=null?r.rop.toFixed(2):''}</td>
+                    <td style={{textAlign:'right',fontWeight:600,color:'#7c3aed'}}>{r.safetyStock!=null?Math.floor(r.safetyStock):''}</td>
+                    <td style={{textAlign:'right',fontWeight:600,color:'#7c3aed'}}>{r.rop!=null?Math.floor(r.rop):''}</td>
                   </>}
-                  <td style={{textAlign:'right',color:'#64748b',fontSize:11}}>{(r.cumPct*100).toFixed(1)}%</td>
+                  <td style={{textAlign:'right',color:'#64748b',fontSize:11}}>{Math.floor(r.cumPct*100)}%</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {totalDemandPages>1&&(
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 14px',borderTop:'1px solid #e2e8f0',background:'#f8fafc'}}>
+              <span style={{fontSize:11,color:'#64748b'}}>
+                {(demandPage-1)*DEMAND_PAGE_SIZE+1}–{Math.min(demandPage*DEMAND_PAGE_SIZE,filtered.length)} di {filtered.length} SKU
+              </span>
+              <div style={{display:'flex',gap:4,alignItems:'center'}}>
+                <button className="btn" style={{padding:'3px 10px',fontSize:11}} disabled={demandPage===1} onClick={()=>setDemandPage(p=>p-1)}>‹ Prec</button>
+                <span style={{padding:'3px 10px',fontSize:11,color:'#334155'}}>{demandPage} / {totalDemandPages}</span>
+                <button className="btn" style={{padding:'3px 10px',fontSize:11}} disabled={demandPage===totalDemandPages} onClick={()=>setDemandPage(p=>p+1)}>Succ ›</button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
