@@ -148,11 +148,11 @@ function downloadFile(content, filename, mimeType) {
   URL.revokeObjectURL(url);
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 //  SUPABASE SYNC HELPERS
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 
-/** Transform Supabase mrp_skus rows â app format */
+/** Transform Supabase mrp_skus rows → app format */
 function dbSkusToApp(rows) {
   return rows.map(r => ({
     id: r.id,
@@ -164,7 +164,7 @@ function dbSkusToApp(rows) {
   }));
 }
 
-/** Transform Supabase mrp_open_pos rows â app format { SKU_ID: [{qty, eta}] } */
+/** Transform Supabase mrp_open_pos rows → app format { SKU_ID: [{qty, eta}] } */
 function dbPosToApp(rows) {
   const pos = {};
   rows.forEach(r => {
@@ -174,7 +174,7 @@ function dbPosToApp(rows) {
   return pos;
 }
 
-/** Transform Supabase mrp_sku_overrides rows â app format { SKU_ID: {leadTime, moq, ...} } */
+/** Transform Supabase mrp_sku_overrides rows → app format { SKU_ID: {leadTime, moq, ...} } */
 function dbOverridesToApp(rows) {
   const ov = {};
   rows.forEach(r => {
@@ -188,7 +188,7 @@ function dbOverridesToApp(rows) {
   return ov;
 }
 
-/** Transform Supabase mrp_category_params rows â app format { Category: {...} } */
+/** Transform Supabase mrp_category_params rows → app format { Category: {...} } */
 function dbCatParamsToApp(rows) {
   const cp = { ...CATEGORY_DEFAULTS };
   rows.forEach(r => {
@@ -203,9 +203,9 @@ function dbCatParamsToApp(rows) {
   return cp;
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 //  MAIN APP
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 export default function MRPPlanner() {
   const [view,          setView]          = useState("workbench");
   const [selectedSKU,   setSelectedSKU]   = useState(null);
@@ -214,7 +214,7 @@ export default function MRPPlanner() {
   const [search,        setSearch]        = useState("");
   const [editingParams, setEditingParams] = useState(null);
 
-  // Data state â starts from defaults, overwritten by Supabase on load
+  // Data state — starts from defaults, overwritten by Supabase on load
   const [catParams,     setCatParams]     = useState({...CATEGORY_DEFAULTS});
   const [skusRaw,       setSkusRaw]       = useState(SKUS_DEFAULT);
   const [openPOs,       setOpenPOs]       = useState(OPEN_POS_DEFAULT);
@@ -226,7 +226,7 @@ export default function MRPPlanner() {
   const [uploadMsg, setUploadMsg] = useState('');
   const fileRef = useRef();
 
-  // ââ Load all data from Supabase on mount ââ
+  // ── Load all data from Supabase on mount ──
   useEffect(() => {
     let cancelled = false;
     async function loadFromDB() {
@@ -263,7 +263,7 @@ export default function MRPPlanner() {
     return () => { cancelled = true; };
   }, []);
 
-  // ââ Realtime subscription: auto-refresh when DB changes ââ
+  // ── Realtime subscription: auto-refresh when DB changes ──
   useEffect(() => {
     if (dbStatus !== "live") return;
     const channel = supabase
@@ -288,7 +288,7 @@ export default function MRPPlanner() {
     return () => { supabase.removeChannel(channel); };
   }, [dbStatus]);
 
-  // ââ Save SKU overrides to Supabase ââ
+  // ── Save SKU overrides to Supabase ──
   const saveSkuOverride = useCallback(async (skuId, overrides) => {
     setSkuOverrides(prev => ({ ...prev, [skuId]: overrides }));
     if (dbStatus !== "live") return;
@@ -303,7 +303,7 @@ export default function MRPPlanner() {
     if (error) console.error('Failed to save override:', error);
   }, [dbStatus]);
 
-  // ââ Save category params to Supabase ââ
+  // ── Save category params to Supabase ──
   const saveCatParams = useCallback(async (newParams) => {
     setCatParams(newParams);
     if (dbStatus !== "live") return;
@@ -319,7 +319,7 @@ export default function MRPPlanner() {
     if (error) console.error('Failed to save cat params:', error);
   }, [dbStatus]);
 
-  // ââ File upload handler ââ
+  // ── File upload handler ──
   function handleUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -386,7 +386,7 @@ export default function MRPPlanner() {
           }
         }
 
-        if (!newSkus.length && !poCount) setUploadMsg('No valid SKU data found â check column headers.');
+        if (!newSkus.length && !poCount) setUploadMsg('No valid SKU data found — check column headers.');
       } catch(err) {
         setUploadMsg('Parse error: ' + err.message);
       }
@@ -395,7 +395,7 @@ export default function MRPPlanner() {
     e.target.value = '';
   }
 
-  // ââ Download MRP results ââ
+  // ── Download MRP results ──
   function downloadResults() {
     const rows = enriched.map(s=>({
       SKU:            s.id,
@@ -499,10 +499,10 @@ export default function MRPPlanner() {
         <div style={{marginLeft:"auto",display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
           <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{display:"none"}} onChange={handleUpload}/>
           <button className="btn" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>fileRef.current.click()}>
-            â Upload CSV
+            ↑ Upload CSV
           </button>
           <button className="btn btn-green" style={{fontSize:10,padding:"4px 10px"}} onClick={downloadResults}>
-            â Export CSV
+            ↓ Export CSV
           </button>
           <span className="tag">Horizon: 90d</span>
           <span className="tag">SKUs: {skusRaw.length}</span>
@@ -518,14 +518,14 @@ export default function MRPPlanner() {
       {uploadMsg&&(
         <div style={{background:"#eff6ff",borderBottom:"1px solid #bfdbfe",padding:"6px 24px",fontSize:11,color:"#2563eb",display:"flex",justifyContent:"space-between"}}>
           <span>{uploadMsg}</span>
-          <button style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:12}} onClick={()=>setUploadMsg('')}>â</button>
+          <button style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:12}} onClick={()=>setUploadMsg('')}>✕</button>
         </div>
       )}
 
       {/* DB offline warning */}
       {dbStatus==="offline"&&(
         <div style={{background:"#fef9c3",borderBottom:"1px solid #fde047",padding:"6px 24px",fontSize:11,color:"#854d0e"}}>
-          â  Supabase unreachable â showing local defaults. Check your anon key in supabaseClient.js and RLS policies.
+          ⚠ Supabase unreachable — showing local defaults. Check your anon key in supabaseClient.js and RLS policies.
         </div>
       )}
 
@@ -579,9 +579,9 @@ export default function MRPPlanner() {
   );
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 //  WORKBENCH VIEW (unchanged)
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterStatus,search,setSearch,openPOs,onOpenDetail,onEditParams}) {
   const PAGE_SIZE = 50;
   const [page, setPage] = useState(1);
@@ -591,7 +591,7 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
   return (
     <div>
       <div style={{display:"flex",gap:10,marginBottom:16,alignItems:"center",flexWrap:"wrap"}}>
-        <input className="input" placeholder="Search SKU / nameâ¦" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
+        <input className="input" placeholder="Search SKU / name…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
         <select className="select" value={filterCat} onChange={e=>setFilterCat(e.target.value)}>
           <option>All</option>
           {CATEGORIES.map(c=><option key={c}>{c}</option>)}
@@ -635,7 +635,7 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
                   <td style={{color:"#94a3b8"}}>{s.moq}</td>
                   <td style={{color:totalOpen>0?"#7c3aed":"#94a3b8"}}>{totalOpen>0?Math.floor(totalOpen):""}</td>
                   <td style={{color:s.mrp.orders.length>0?"#2563eb":"#94a3b8"}}>
-                    {s.mrp.orders.length>0?`${s.mrp.orders.length} Ã ${s.mrp.orders[0]?.qty}`:""}
+                    {s.mrp.orders.length>0?`${s.mrp.orders.length} × ${s.mrp.orders[0]?.qty}`:""}
                   </td>
                   <td><span className={`pill badge-${status}`}>{STATUS_LABEL[status]}</span></td>
                   <td>
@@ -649,12 +649,12 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
         {totalPages>1&&(
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderTop:"1px solid #e2e8f0",background:"#f8fafc"}}>
             <span style={{fontSize:11,color:"#64748b"}}>
-              {(page-1)*PAGE_SIZE+1}â{Math.min(page*PAGE_SIZE,enriched.length)} di {enriched.length} SKU
+              {(page-1)*PAGE_SIZE+1}–{Math.min(page*PAGE_SIZE,enriched.length)} di {enriched.length} SKU
             </span>
             <div style={{display:"flex",gap:4,alignItems:"center"}}>
-              <button className="btn" style={{padding:"3px 10px",fontSize:11}} disabled={page===1} onClick={()=>setPage(p=>p-1)}>â¹ Prec</button>
+              <button className="btn" style={{padding:"3px 10px",fontSize:11}} disabled={page===1} onClick={()=>setPage(p=>p-1)}>‹ Prec</button>
               <span style={{padding:"3px 10px",fontSize:11,color:"#334155"}}>{page} / {totalPages}</span>
-              <button className="btn" style={{padding:"3px 10px",fontSize:11}} disabled={page===totalPages} onClick={()=>setPage(p=>p+1)}>Succ âº</button>
+              <button className="btn" style={{padding:"3px 10px",fontSize:11}} disabled={page===totalPages} onClick={()=>setPage(p=>p+1)}>Succ ›</button>
             </div>
           </div>
         )}
@@ -663,16 +663,16 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
   );
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 //  DETAIL VIEW (unchanged)
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
   const chartData = mrp.curve.filter((_,i)=>i%3===0);
   const status = mrp.status;
   return (
     <div>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-        <button className="btn" onClick={onBack}>â Back</button>
+        <button className="btn" onClick={onBack}>← Back</button>
         <span style={{color:"#2563eb",fontWeight:600,fontSize:16}}>{sku.id}</span>
         <span style={{color:"#0f172a",fontSize:14}}>{sku.name}</span>
         <span className="tag">{sku.category}</span>
@@ -699,7 +699,7 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
       <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:16}}>
         <div className="card" style={{padding:20}}>
           <div style={{fontSize:11,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:16}}>
-            Projected Stock Curve â 90 Day Horizon
+            Projected Stock Curve — 90 Day Horizon
           </div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={chartData} margin={{top:5,right:20,bottom:5,left:0}}>
@@ -756,9 +756,9 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
   );
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 //  EXCEPTION VIEW (unchanged)
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function ExceptionView({exceptions,onOpenDetail}) {
   return (
     <div>
@@ -767,8 +767,8 @@ function ExceptionView({exceptions,onOpenDetail}) {
       </div>
       {exceptions.length===0&&(
         <div className="card" style={{padding:40,textAlign:"center",color:"#16a34a"}}>
-          <div style={{fontSize:24,marginBottom:8}}>â</div>
-          <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,color:"#0f172a"}}>No exceptions â all SKUs within parameters</div>
+          <div style={{fontSize:24,marginBottom:8}}>✓</div>
+          <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,color:"#0f172a"}}>No exceptions — all SKUs within parameters</div>
         </div>
       )}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:12}}>
@@ -798,7 +798,7 @@ function ExceptionView({exceptions,onOpenDetail}) {
               </div>
               {s.mrp.orders.length>0&&(
                 <div style={{marginTop:10,fontSize:11,color:"#2563eb",background:"#eff6ff",border:"1px solid #bfdbfe",padding:"6px 10px",borderRadius:3}}>
-                  â {s.mrp.orders.length} planned order(s) Â· Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
+                  → {s.mrp.orders.length} planned order(s) · Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
                 </div>
               )}
             </div>
@@ -809,9 +809,9 @@ function ExceptionView({exceptions,onOpenDetail}) {
   );
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 //  CATEGORY VIEW (unchanged logic, saveCatParams injected)
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function CategoryView({catSummary,catParams,setCatParams,enriched}) {
   const [editCat,setEditCat]=useState(null);
   const [draft,setDraft]=useState({});
@@ -847,8 +847,8 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
         <div className="card" style={{padding:20}}>
           <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Planning Logic</div>
           <div style={{fontSize:11,color:"#64748b",lineHeight:1.8}}>
-            <p style={{marginBottom:8}}><span style={{color:"#7c3aed"}}>Reorder Point</span> = Safety Stock + (Avg Daily Ã Lead Time)</p>
-            <p style={{marginBottom:8}}><span style={{color:"#2563eb"}}>Order Qty</span> = CEIL(Net Req / Order Multiple) Ã OM, min MOQ</p>
+            <p style={{marginBottom:8}}><span style={{color:"#7c3aed"}}>Reorder Point</span> = Safety Stock + (Avg Daily × Lead Time)</p>
+            <p style={{marginBottom:8}}><span style={{color:"#2563eb"}}>Order Qty</span> = CEIL(Net Req / Order Multiple) × OM, min MOQ</p>
             <p style={{marginBottom:8}}><span style={{color:"#dc2626"}}>CRITICAL</span> = Projected stock &lt; 0 at horizon</p>
             <p style={{marginBottom:8}}><span style={{color:"#ea580c"}}>AT RISK</span> = Stock &lt; Safety Stock at horizon</p>
             <p><span style={{color:"#ca8a04"}}>WATCH</span> = Days cover &lt; Lead Time (weeks)</p>
@@ -890,7 +890,7 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
       {editCat&&(
         <div className="modal-overlay" onClick={()=>setEditCat(null)}>
           <div className="modal" onClick={e=>e.stopPropagation()}>
-            <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:20}}>Edit Category Defaults â {editCat}</div>
+            <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:20}}>Edit Category Defaults — {editCat}</div>
             {Object.entries(draft).map(([key,val])=>(
               <div key={key} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
                 <label style={{fontSize:12,color:"#94a3b8",textTransform:"uppercase",letterSpacing:"0.06em"}}>{key}</label>
@@ -912,9 +912,9 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
   );
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 //  PARAM MODAL (unchanged)
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
   const cat=catParams[sku.category];
   const [draft,setDraft]=useState({
@@ -934,7 +934,7 @@ function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e=>e.stopPropagation()} style={{minWidth:460}}>
-        <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:4}}>SKU Parameters â {sku.id}</div>
+        <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:4}}>SKU Parameters — {sku.id}</div>
         <div style={{fontSize:11,color:"#94a3b8",marginBottom:20}}>Leave blank to inherit from category ({sku.category})</div>
         {fields.map(f=>(
           <div key={f.key} style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
@@ -963,9 +963,9 @@ function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
   );
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 //  DEMAND ANALYSIS VIEW (unchanged)
-// âââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────
 function parseDemandCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
@@ -1091,16 +1091,16 @@ function DemandView() {
   const MONTHS=[1,2,3,4,5,6,7,8,9,10,11,12];
   const CB={A:'#16a34a',B:'#2563eb',C:'#94a3b8'};
   const BG={A:'#dcfce7',B:'#dbeafe',C:'#f1f5f9'};
-  const SH=(col,label,extra={})=><th style={{textAlign:'right',cursor:'pointer',whiteSpace:'nowrap',color:sortCol===col?'#2563eb':'#94a3b8',...extra}} onClick={()=>toggleSort(col)}>{label}{sortCol===col?(sortDir==='desc'?' â':' â'):''}</th>;
+  const SH=(col,label,extra={})=><th style={{textAlign:'right',cursor:'pointer',whiteSpace:'nowrap',color:sortCol===col?'#2563eb':'#94a3b8',...extra}} onClick={()=>toggleSort(col)}>{label}{sortCol===col?(sortDir==='desc'?' ↓':' ↑'):''}</th>;
   return (
     <div>
       <div style={{display:'flex',gap:8,marginBottom:12,alignItems:'center',flexWrap:'wrap'}}>
         <input ref={demandFileRef} type="file" accept=".csv,.tsv,.txt" style={{display:'none'}} onChange={handleDemandUpload}/>
         <input ref={masterFileRef} type="file" accept=".csv,.tsv,.txt" style={{display:'none'}} onChange={handleMasterUpload}/>
-        <button className="btn btn-primary" style={{fontSize:10,padding:'4px 12px'}} onClick={()=>demandFileRef.current.click()}>â Demand CSV</button>
-        <button className={hasMaster?'btn btn-green':'btn'} style={{fontSize:10,padding:'4px 12px'}} onClick={()=>masterFileRef.current.click()}>â Master Data</button>
-        {analyzed.length>0&&<button className="btn btn-green" style={{fontSize:10,padding:'4px 12px'}} onClick={handleExport}>â Export</button>}
-        <input className="input" placeholder="Searchâ¦" value={search} onChange={e=>setSearch(e.target.value)} style={{width:200}}/>
+        <button className="btn btn-primary" style={{fontSize:10,padding:'4px 12px'}} onClick={()=>demandFileRef.current.click()}>↑ Demand CSV</button>
+        <button className={hasMaster?'btn btn-green':'btn'} style={{fontSize:10,padding:'4px 12px'}} onClick={()=>masterFileRef.current.click()}>↑ Master Data</button>
+        {analyzed.length>0&&<button className="btn btn-green" style={{fontSize:10,padding:'4px 12px'}} onClick={handleExport}>↓ Export</button>}
+        <input className="input" placeholder="Search…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:200}}/>
         <select className="select" value={filterClass} onChange={e=>setFilterClass(e.target.value)}>
           <option value="All">All Classes</option><option value="A">Class A</option><option value="B">Class B</option><option value="C">Class C</option>
         </select>
@@ -1108,20 +1108,20 @@ function DemandView() {
       </div>
       {demandMsg&&<div style={{background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:3,padding:'5px 12px',fontSize:11,color:'#2563eb',marginBottom:6}}>{demandMsg}</div>}
       {masterMsg&&<div style={{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:3,padding:'5px 12px',fontSize:11,color:'#16a34a',marginBottom:6}}>{masterMsg}</div>}
-      {!hasMaster&&rows.length>0&&<div style={{background:'#fffbeb',border:'1px solid #fde68a',borderRadius:3,padding:'7px 14px',fontSize:11,color:'#92400e',marginBottom:10}}>â  Upload <strong>Master Data CSV</strong> to compute Safety Stock and ROP</div>}
+      {!hasMaster&&rows.length>0&&<div style={{background:'#fffbeb',border:'1px solid #fde68a',borderRadius:3,padding:'7px 14px',fontSize:11,color:'#92400e',marginBottom:10}}>⚠ Upload <strong>Master Data CSV</strong> to compute Safety Stock and ROP</div>}
       {analyzed.length>0&&(
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:16}}>
-          {[{label:'Total SKUs',val:counts.total,color:'#2563eb'},{label:'Class A â Z=1.88',val:counts.A,color:'#16a34a'},{label:'Class B â Z=1.64',val:counts.B,color:'#2563eb'},{label:'Class C â Z=1.28',val:counts.C,color:'#94a3b8'}].map(k=>(
+          {[{label:'Total SKUs',val:counts.total,color:'#2563eb'},{label:'Class A – Z=1.88',val:counts.A,color:'#16a34a'},{label:'Class B – Z=1.64',val:counts.B,color:'#2563eb'},{label:'Class C – Z=1.28',val:counts.C,color:'#94a3b8'}].map(k=>(
             <div key={k.label} className="stat-card"><div style={{fontSize:22,fontWeight:600,color:k.color,fontFamily:"'IBM Plex Sans',sans-serif"}}>{k.val}</div><div style={{fontSize:10,color:'#94a3b8',letterSpacing:'0.08em',textTransform:'uppercase',marginTop:2}}>{k.label}</div></div>
           ))}
         </div>
       )}
       {rows.length===0&&(
         <div className="card" style={{padding:48,textAlign:'center'}}>
-          <div style={{fontSize:32,marginBottom:12}}>ð</div>
+          <div style={{fontSize:32,marginBottom:12}}>📊</div>
           <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,fontSize:14,color:'#0f172a',marginBottom:8}}>Demand Analysis</div>
           <div style={{display:'flex',gap:20,justifyContent:'center',flexWrap:'wrap',marginTop:16}}>
-            <div style={{background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:3,padding:'12px 18px',fontSize:10,fontFamily:'monospace',textAlign:'left'}}><div style={{color:'#2563eb',marginBottom:4,fontWeight:600}}>DemandTable.csv</div><div>sku, description, month1â¦month12</div></div>
+            <div style={{background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:3,padding:'12px 18px',fontSize:10,fontFamily:'monospace',textAlign:'left'}}><div style={{color:'#2563eb',marginBottom:4,fontWeight:600}}>DemandTable.csv</div><div>sku, description, month1…month12</div></div>
             <div style={{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:3,padding:'12px 18px',fontSize:10,fontFamily:'monospace',textAlign:'left'}}><div style={{color:'#16a34a',marginBottom:4,fontWeight:600}}>MasterDataTable.csv</div><div>sku, description, lt, moq, multiplelot</div></div>
           </div>
         </div>
@@ -1173,12 +1173,12 @@ function DemandView() {
           {totalDemandPages>1&&(
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 14px',borderTop:'1px solid #e2e8f0',background:'#f8fafc'}}>
               <span style={{fontSize:11,color:'#64748b'}}>
-                {(demandPage-1)*DEMAND_PAGE_SIZE+1}â{Math.min(demandPage*DEMAND_PAGE_SIZE,filtered.length)} di {filtered.length} SKU
+                {(demandPage-1)*DEMAND_PAGE_SIZE+1}–{Math.min(demandPage*DEMAND_PAGE_SIZE,filtered.length)} di {filtered.length} SKU
               </span>
               <div style={{display:'flex',gap:4,alignItems:'center'}}>
-                <button className="btn" style={{padding:'3px 10px',fontSize:11}} disabled={demandPage===1} onClick={()=>setDemandPage(p=>p-1)}>â¹ Prec</button>
+                <button className="btn" style={{padding:'3px 10px',fontSize:11}} disabled={demandPage===1} onClick={()=>setDemandPage(p=>p-1)}>‹ Prec</button>
                 <span style={{padding:'3px 10px',fontSize:11,color:'#334155'}}>{demandPage} / {totalDemandPages}</span>
-                <button className="btn" style={{padding:'3px 10px',fontSize:11}} disabled={demandPage===totalDemandPages} onClick={()=>setDemandPage(p=>p+1)}>Succ âº</button>
+                <button className="btn" style={{padding:'3px 10px',fontSize:11}} disabled={demandPage===totalDemandPages} onClick={()=>setDemandPage(p=>p+1)}>Succ ›</button>
               </div>
             </div>
           )}
