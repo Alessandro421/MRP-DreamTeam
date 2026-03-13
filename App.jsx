@@ -80,9 +80,11 @@ const STATUS_LABEL = { critical:"CRITICAL","at-risk":"AT RISK", watch:"WATCH",  
 // CSV helpers
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
-  const headers = lines[0].split(',').map(h=>h.trim().toLowerCase());
-  return lines.slice(1).map(l=>{
-    const vals = l.split(',').map(v=>v.trim());
+  const firstLine = lines[0];
+  const delim = (firstLine.split(';').length > firstLine.split(',').length) ? ';' : ',';
+  const headers = firstLine.split(delim).map(h=>h.trim().toLowerCase().replace(/['"]/g,''));
+  return lines.slice(1).filter(l=>l.trim()).map(l=>{
+    const vals = l.split(delim).map(v=>v.trim().replace(/^['"]|['"]$/g,''));
     const obj = {};
     headers.forEach((h,i)=>{ obj[h]=vals[i]??''; });
     return obj;
@@ -383,6 +385,9 @@ export default function MRPPlanner() {
               const { error: poErr } = await supabase.from('mrp_open_pos').insert(poRows);
               if (poErr) console.error('Insert POs error:', poErr);
             }
+            // Re-fetch after write to ensure local state reflects DB (avoids realtime race condition on DELETE event)
+            const { data: freshPOs } = await supabase.from('mrp_open_pos').select('*');
+            if (freshPOs) setOpenPOs(dbPosToApp(freshPOs));
           }
         }
 
@@ -635,7 +640,7 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
                   <td style={{color:"#94a3b8"}}>{s.moq}</td>
                   <td style={{color:totalOpen>0?"#7c3aed":"#94a3b8"}}>{totalOpen>0?Math.floor(totalOpen):""}</td>
                   <td style={{color:s.mrp.orders.length>0?"#2563eb":"#94a3b8"}}>
-                    {s.mrp.orders.length>0?`${s.mrp.orders.length} × ${s.mrp.orders[0]?.qty}`:""}
+                    {s.mrp.orders.length>0?`${s.mrp.orders.length} � ${s.mrp.orders[0]?.qty}`:""}
                   </td>
                   <td><span className={`pill badge-${status}`}>{STATUS_LABEL[status]}</span></td>
                   <td>
@@ -798,7 +803,7 @@ function ExceptionView({exceptions,onOpenDetail}) {
               </div>
               {s.mrp.orders.length>0&&(
                 <div style={{marginTop:10,fontSize:11,color:"#2563eb",background:"#eff6ff",border:"1px solid #bfdbfe",padding:"6px 10px",borderRadius:3}}>
-                  → {s.mrp.orders.length} planned order(s) · Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
+                  → {s.mrp.orders.length} planned order(s) � Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
                 </div>
               )}
             </div>
@@ -847,8 +852,8 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
         <div className="card" style={{padding:20}}>
           <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Planning Logic</div>
           <div style={{fontSize:11,color:"#64748b",lineHeight:1.8}}>
-            <p style={{marginBottom:8}}><span style={{color:"#7c3aed"}}>Reorder Point</span> = Safety Stock + (Avg Daily × Lead Time)</p>
-            <p style={{marginBottom:8}}><span style={{color:"#2563eb"}}>Order Qty</span> = CEIL(Net Req / Order Multiple) × OM, min MOQ</p>
+            <p style={{marginBottom:8}}><span style={{color:"#7c3aed"}}>Reorder Point</span> = Safety Stock + (Avg Daily � Lead Time)</p>
+            <p style={{marginBottom:8}}><span style={{color:"#2563eb"}}>Order Qty</span> = CEIL(Net Req / Order Multiple) � OM, min MOQ</p>
             <p style={{marginBottom:8}}><span style={{color:"#dc2626"}}>CRITICAL</span> = Projected stock &lt; 0 at horizon</p>
             <p style={{marginBottom:8}}><span style={{color:"#ea580c"}}>AT RISK</span> = Stock &lt; Safety Stock at horizon</p>
             <p><span style={{color:"#ca8a04"}}>WATCH</span> = Days cover &lt; Lead Time (weeks)</p>
