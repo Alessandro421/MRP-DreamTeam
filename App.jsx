@@ -225,10 +225,13 @@ export default function MRPPlanner() {
   );
 
   const [dbStatus, setDbStatus] = useState("loading"); // "loading" | "live" | "offline"
+  const [realtimeStatus, setRealtimeStatus] = useState("connecting"); // "connecting" | "subscribed" | "error"
   const [uploadMsg, setUploadMsg] = useState("");
   const [lastDbError, setLastDbError] = useState("");
   const [syncMsg, setSyncMsg] = useState("");
   const fileRef = useRef();
+  const channelName = useRef("mrp_realtime_" + Math.random().toString(36).slice(2));
+  const debounceTimer = useRef(null);
 
   function formatDbError(error, fallback) {
     if (!error) return fallback;
@@ -279,6 +282,11 @@ export default function MRPPlanner() {
     }
   }, []);
 
+  const debouncedLoad = useCallback(() => {
+    clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => loadFromDB(), 300);
+  }, [loadFromDB]);
+
   // ── Load all data from Supabase on mount ──
   useEffect(() => {
     loadFromDB();
@@ -286,44 +294,46 @@ export default function MRPPlanner() {
 
   // ── Realtime subscription: auto-refresh when DB changes ──
   useEffect(() => {
-    if (dbStatus !== "live") return;
+    setRealtimeStatus("connecting");
 
     const channel = supabase
-      .channel("mrp_realtime")
+      .channel(channelName.current)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "mrp_skus" },
-        async () => {
-          await loadFromDB();
-        }
+        () => { debouncedLoad(); }
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "mrp_open_pos" },
-        async () => {
-          await loadFromDB();
-        }
+        () => { debouncedLoad(); }
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "mrp_sku_overrides" },
-        async () => {
-          await loadFromDB();
-        }
+        () => { debouncedLoad(); }
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "mrp_category_params" },
-        async () => {
-          await loadFromDB();
-        }
+        () => { debouncedLoad(); }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          setRealtimeStatus("subscribed");
+          console.log("[Realtime] Subscription active");
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          setRealtimeStatus("error");
+          console.warn("[Realtime] Connection issue:", status);
+          debouncedLoad();
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
+      clearTimeout(debounceTimer.current);
     };
-  }, [dbStatus, loadFromDB]);
+  }, [loadFromDB, debouncedLoad]);
 
   // ── Save SKU overrides to Supabase ──
   const saveSkuOverride = useCallback(
@@ -606,6 +616,11 @@ export default function MRPPlanner() {
   const dbLabel =
     dbStatus === "live" ? "DB LIVE" : dbStatus === "loading" ? "CONNECTING..." : "OFFLINE";
 
+  const rtDot =
+    realtimeStatus === "subscribed" ? "#16a34a" : realtimeStatus === "connecting" ? "#f59e0b" : "#ca8a04";
+  const rtLabel =
+    realtimeStatus === "subscribed" ? "REALTIME" : realtimeStatus === "connecting" ? "RT CONN..." : "RT ERROR";
+
   return (
     <div style={{fontFamily:"'IBM Plex Mono','Courier New',monospace",background:"#f0f2f5",minHeight:"100vh",color:"#1e293b"}}>
       <style>{`
@@ -639,6 +654,7 @@ export default function MRPPlanner() {
         td{padding:10px 12px;font-size:12px;border-bottom:1px solid #f1f5f9;color:#334155}
         .anim-in{animation:fadeSlide 0.2s ease}
         @keyframes fadeSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
         .badge-critical{background:#fee2e2;color:#dc2626}
         .badge-at-risk{background:#ffedd5;color:#ea580c}
         .badge-watch{background:#fef9c3;color:#ca8a04}
@@ -675,6 +691,11 @@ export default function MRPPlanner() {
           <div style={{display:"flex",alignItems:"center",gap:5,padding:"3px 8px",background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:2}}>
             <div style={{width:7,height:7,background:dbDot,borderRadius:"50%",boxShadow:`0 0 6px ${dbDot}`}}/>
             <span style={{fontSize:10,color:"#64748b",letterSpacing:"0.06em"}}>{dbLabel}</span>
+          </div>
+          {/* Realtime Status indicator */}
+          <div style={{display:"flex",alignItems:"center",gap:5,padding:"3px 8px",background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:2}}>
+            <div style={{width:7,height:7,background:rtDot,borderRadius:"50%",boxShadow:`0 0 6px ${rtDot}`,animation:realtimeStatus==="subscribed"?"pulse 2s infinite":"none"}}/>
+            <span style={{fontSize:10,color:"#64748b",letterSpacing:"0.06em"}}>{rtLabel}</span>
           </div>
         </div>
       </div>
