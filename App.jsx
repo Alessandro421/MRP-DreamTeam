@@ -230,7 +230,8 @@ export default function MRPPlanner() {
   const [lastDbError, setLastDbError] = useState("");
   const [syncMsg, setSyncMsg] = useState("");
   const fileRef = useRef();
-  const channelName = useRef("mrp_realtime_" + Math.random().toString(36).slice(2));
+  const channelName = useRef("mrp_global_v1");
+  const channelRef = useRef(null);
   const debounceTimer = useRef(null);
 
   function formatDbError(error, fallback) {
@@ -287,6 +288,10 @@ export default function MRPPlanner() {
     debounceTimer.current = setTimeout(() => loadFromDB(), 300);
   }, [loadFromDB]);
 
+  const broadcastChange = useCallback(() => {
+    channelRef.current?.send({ type: "broadcast", event: "data_changed", payload: {} });
+  }, []);
+
   // ── Load all data from Supabase on mount ──
   useEffect(() => {
     loadFromDB();
@@ -318,6 +323,7 @@ export default function MRPPlanner() {
         { event: "*", schema: "public", table: "mrp_category_params" },
         () => { debouncedLoad(); }
       )
+      .on("broadcast", { event: "data_changed" }, () => { debouncedLoad(); })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
           setRealtimeStatus("subscribed");
@@ -329,8 +335,11 @@ export default function MRPPlanner() {
         }
       });
 
+    channelRef.current = channel;
+
     return () => {
       supabase.removeChannel(channel);
+      channelRef.current = null;
       clearTimeout(debounceTimer.current);
     };
   }, [loadFromDB, debouncedLoad]);
@@ -362,9 +371,10 @@ export default function MRPPlanner() {
       }
 
       setLastDbError("");
+      broadcastChange();
       await loadFromDB();
     },
-    [dbStatus, skuOverrides, loadFromDB]
+    [dbStatus, skuOverrides, loadFromDB, broadcastChange]
   );
 
   // ── Save category params to Supabase ──
@@ -397,9 +407,10 @@ export default function MRPPlanner() {
       }
 
       setLastDbError("");
+      broadcastChange();
       await loadFromDB();
     },
-    [dbStatus, catParams, loadFromDB]
+    [dbStatus, catParams, loadFromDB, broadcastChange]
   );
 
   // ── File upload handler ──
@@ -520,6 +531,7 @@ export default function MRPPlanner() {
         }
 
         if (dbStatus === "live") {
+          broadcastChange();
           await loadFromDB();
           setLastDbError("");
         }
