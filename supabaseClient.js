@@ -1,16 +1,45 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl =
-  import.meta.env.VITE_SUPABASE_URL || "https://fnzyowauvewigstdlfgp.supabase.co";
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const supabaseAnonKey =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  "REPLACE_WITH_YOUR_ANON_KEY_IF_NOT_USING_ENV";
+function createOfflineClient(reason) {
+  const error = { message: `Supabase unavailable: ${reason}` };
+  const queryBuilder = {
+    select: async () => ({ data: [], error }),
+    upsert: async () => ({ data: null, error }),
+    delete: () => ({ eq: async () => ({ data: null, error }) }),
+  };
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase environment variables.");
+  return {
+    from: () => queryBuilder,
+    channel: () => ({
+      on() {
+        return this;
+      },
+      subscribe(cb) {
+        cb?.("CHANNEL_ERROR");
+        return this;
+      },
+      send: async () => ({ error }),
+    }),
+    removeChannel: async () => ({ error: null }),
+  };
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: { persistSession: false },
-});
+let supabaseClient = createOfflineClient("missing VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY");
+
+if (supabaseUrl && supabaseAnonKey) {
+  try {
+    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false },
+    });
+  } catch (err) {
+    console.error("Failed to initialize Supabase client.", err);
+    supabaseClient = createOfflineClient("invalid Supabase credentials");
+  }
+} else {
+  console.warn("Supabase env vars missing; app running in offline mode.");
+}
+
+export const supabase = supabaseClient;

@@ -36,41 +36,68 @@ const OPEN_POS_DEFAULT = {
 };
 
 function buildSKU(raw, catOverrides) {
-  const cat = catOverrides[raw.category] || CATEGORY_DEFAULTS[raw.category];
+  const fallbackCat = "Spare Parts";
+  const fallbackParams = { leadTime: 30, moq: 1, orderMultiple: 1, safetyStock: 0, reviewCycle: 7 };
+  const category = CATEGORIES.includes(raw?.category) ? raw.category : fallbackCat;
+  const overrides = raw?.overrides || {};
+  const resolved = {
+    ...fallbackParams,
+    ...(CATEGORY_DEFAULTS[fallbackCat] || {}),
+    ...(CATEGORY_DEFAULTS[category] || {}),
+    ...(catOverrides?.[category] || {}),
+    ...overrides,
+  };
+  const toNum = (value, fallback) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
+  };
+
   return {
     ...raw,
-    leadTime:      raw.overrides.leadTime      ?? cat.leadTime,
-    moq:           raw.overrides.moq           ?? cat.moq,
-    orderMultiple: raw.overrides.orderMultiple ?? cat.orderMultiple,
-    safetyStock:   raw.overrides.safetyStock   ?? cat.safetyStock,
-    reviewCycle:   raw.overrides.reviewCycle   ?? cat.reviewCycle,
+    category,
+    overrides,
+    leadTime:      toNum(resolved.leadTime, fallbackParams.leadTime),
+    moq:           toNum(resolved.moq, fallbackParams.moq),
+    orderMultiple: toNum(resolved.orderMultiple, fallbackParams.orderMultiple),
+    safetyStock:   toNum(resolved.safetyStock, fallbackParams.safetyStock),
+    reviewCycle:   toNum(resolved.reviewCycle, fallbackParams.reviewCycle),
   };
 }
 
 function calcMRP(sku, openPOs, horizon=90) {
-  const pos = openPOs[sku.id] || [];
-  let proj = sku.stock;
+  if (!sku || typeof sku !== "object") {
+    return { curve: [], orders: [], finalStock: 0, daysOfStock: 0, rop: 0, status: "critical" };
+  }
+
+  const leadTime = Number.isFinite(Number(sku.leadTime)) ? Number(sku.leadTime) : 30;
+  const reviewCycle = Number.isFinite(Number(sku.reviewCycle)) ? Math.max(1, Number(sku.reviewCycle)) : 7;
+  const safetyStock = Number.isFinite(Number(sku.safetyStock)) ? Number(sku.safetyStock) : 0;
+  const avgDaily = Number.isFinite(Number(sku.avgDaily)) ? Number(sku.avgDaily) : 0;
+  const pos = openPOs?.[sku.id] || [];
+  let proj = Number.isFinite(Number(sku.stock)) ? Number(sku.stock) : 0;
   const curve = [], orders = [];
   for (let d=0; d<=horizon; d++) {
     const receipts = pos.filter(p=>p.eta===d).reduce((s,p)=>s+p.qty,0);
     const planned  = orders.filter(o=>o.receiptDay===d).reduce((s,o)=>s+o.qty,0);
-    proj += receipts + planned - sku.avgDaily;
-    curve.push({ day:d, stock:Math.round(proj), safety:sku.safetyStock });
-    if (d % sku.reviewCycle === 0) {
-      const futureDay = d + sku.leadTime;
-      const stockAtFuture = proj - sku.avgDaily*sku.leadTime
+    proj += receipts + planned - avgDaily;
+    curve.push({ day:d, stock:Math.round(proj), safety:safetyStock });
+    if (d % reviewCycle === 0) {
+      const futureDay = d + leadTime;
+      const stockAtFuture = proj - avgDaily*leadTime
         + orders.filter(o=>o.receiptDay>d&&o.receiptDay<=futureDay).reduce((s,o)=>s+o.qty,0);
-      if (stockAtFuture < sku.safetyStock && futureDay<=horizon) {
-        const need = sku.safetyStock + sku.avgDaily*sku.leadTime - stockAtFuture;
-        const raw2 = Math.max(need, sku.moq);
-        const qty  = Math.ceil(raw2/sku.orderMultiple)*sku.orderMultiple;
+      if (stockAtFuture < safetyStock && futureDay<=horizon) {
+        const need = safetyStock + avgDaily*leadTime - stockAtFuture;
+        const moq = Number.isFinite(Number(sku.moq)) ? Number(sku.moq) : 1;
+        const orderMultiple = Number.isFinite(Number(sku.orderMultiple)) ? Math.max(1, Number(sku.orderMultiple)) : 1;
+        const raw2 = Math.max(need, moq);
+        const qty  = Math.ceil(raw2/orderMultiple)*orderMultiple;
         orders.push({ orderDay:d, receiptDay:futureDay, qty });
       }
     }
   }
-  const days = proj / sku.avgDaily;
-  const rop  = sku.safetyStock + sku.avgDaily * sku.leadTime;
-  const status = proj<0 ? "critical" : proj<sku.safetyStock ? "at-risk" : days<sku.leadTime/7 ? "watch" : "ok";
+  const days = avgDaily > 0 ? proj / avgDaily : Infinity;
+  const rop  = safetyStock + avgDaily * leadTime;
+  const status = proj<0 ? "critical" : proj<safetyStock ? "at-risk" : days<leadTime/7 ? "watch" : "ok";
   return { curve, orders, finalStock:proj, daysOfStock:days, rop, status };
 }
 
@@ -159,7 +186,7 @@ function dbSkusToApp(rows) {
   return rows.map(r => ({
     id: r.id,
     name: r.name,
-    category: r.category,
+    category: CATEGORIES.includes(r.category) ? r.category : "Spare Parts",
     stock: parseFloat(r.stock) || 0,
     avgDaily: parseFloat(r.avg_daily) || 0,
     overrides: {},
@@ -572,9 +599,11 @@ export default function MRPPlanner() {
 
   const skus = useMemo(
     () =>
-      skusRaw.map((raw) =>
-        buildSKU({ ...raw, overrides: skuOverrides[raw.id] || {} }, catParams)
-      ),
+      skusRaw
+        .filter((raw) => raw && typeof raw === "object")
+        .map((raw) =>
+          buildSKU({ ...raw, overrides: skuOverrides[raw.id] || {} }, catParams)
+        ),
     [skusRaw, skuOverrides, catParams]
   );
 
@@ -1398,4 +1427,3 @@ function DemandView() {
     </div>
   );
 }
-
