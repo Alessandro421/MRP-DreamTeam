@@ -233,6 +233,7 @@ export default function MRPPlanner() {
   const channelName = useRef("mrp_global_v1");
   const channelRef = useRef(null);
   const debounceTimer = useRef(null);
+  const pollTimer = useRef(null);
 
   function formatDbError(error, fallback) {
     if (!error) return fallback;
@@ -337,10 +338,16 @@ export default function MRPPlanner() {
 
     channelRef.current = channel;
 
+    // Polling fallback: refresh every 30 seconds in case realtime misses events
+    pollTimer.current = setInterval(() => {
+      loadFromDB();
+    }, 30000);
+
     return () => {
       supabase.removeChannel(channel);
       channelRef.current = null;
       clearTimeout(debounceTimer.current);
+      clearInterval(pollTimer.current);
     };
   }, [loadFromDB, debouncedLoad]);
 
