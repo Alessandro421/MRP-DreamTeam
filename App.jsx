@@ -304,16 +304,22 @@ export default function MRPPlanner() {
     return error.message || error.details || error.hint || fallback;
   }
 
-  const fetchAllRows = useCallback(async (tableName) => {
+  const fetchAllRows = useCallback(async (tableName, orderColumn = null) => {
     const pageSize = 1000;
     let from = 0;
     const allRows = [];
+    let totalCount = null;
 
     while (true) {
       const to = from + pageSize - 1;
-      const query = supabase.from(tableName).select("*");
+      let query = supabase
+        .from(tableName)
+        .select("*", { count: from === 0 ? "exact" : undefined });
       const supportsRange = query && typeof query.range === "function";
-      const { data, error } = supportsRange
+      if (orderColumn && typeof query.order === "function") {
+        query = query.order(orderColumn, { ascending: true });
+      }
+      const { data, error, count } = supportsRange
         ? await query.range(from, to)
         : await query;
 
@@ -321,8 +327,12 @@ export default function MRPPlanner() {
 
       const chunk = data || [];
       allRows.push(...chunk);
-      if (!supportsRange || chunk.length < pageSize) break;
-      from += pageSize;
+      if (from === 0 && Number.isFinite(count)) {
+        totalCount = count;
+      }
+      if (!supportsRange || chunk.length === 0 || chunk.length < pageSize) break;
+      from += chunk.length;
+      if (totalCount != null && allRows.length >= totalCount) break;
     }
 
     return { data: allRows, error: null };
@@ -333,10 +343,10 @@ export default function MRPPlanner() {
       setSyncMsg("Refreshing from DB...");
 
       const [skusRes, posRes, ovRes, catRes] = await Promise.all([
-        fetchAllRows("mrp_skus"),
-        fetchAllRows("mrp_open_pos"),
-        fetchAllRows("mrp_sku_overrides"),
-        fetchAllRows("mrp_category_params"),
+        fetchAllRows("mrp_skus", "id"),
+        fetchAllRows("mrp_open_pos", "id"),
+        fetchAllRows("mrp_sku_overrides", "sku_id"),
+        fetchAllRows("mrp_category_params", "category"),
       ]);
 
       const firstError =
