@@ -38,7 +38,10 @@ const OPEN_POS_DEFAULT = {
 function buildSKU(raw, catOverrides) {
   const fallbackCat = "Spare Parts";
   const fallbackParams = { leadTime: 30, moq: 1, orderMultiple: 1, safetyStock: 0, reviewCycle: 7 };
-  const category = CATEGORIES.includes(raw?.category) ? raw.category : fallbackCat;
+  const category =
+    typeof raw?.category === "string" && raw.category.trim()
+      ? raw.category.trim()
+      : fallbackCat;
   const overrides = raw?.overrides || {};
   const resolved = {
     ...fallbackParams,
@@ -158,7 +161,10 @@ function sanitizeUploadedSkus(skus) {
     .filter((s) => s && typeof s === "object")
     .map((s, idx) => {
       const id = (s.id || `SKU-${idx + 1}`).toString().trim().toUpperCase();
-      const category = CATEGORIES.includes(s.category) ? s.category : "Spare Parts";
+      const category =
+        typeof s.category === "string" && s.category.trim()
+          ? s.category.trim()
+          : "Spare Parts";
       const overrides = s.overrides && typeof s.overrides === "object" ? s.overrides : {};
 
       return {
@@ -215,7 +221,10 @@ function dbSkusToApp(rows) {
   return rows.map(r => ({
     id: r.id,
     name: r.name,
-    category: CATEGORIES.includes(r.category) ? r.category : "Spare Parts",
+    category:
+      typeof r.category === "string" && r.category.trim()
+        ? r.category.trim()
+        : "Spare Parts",
     stock: parseFloat(r.stock) || 0,
     avgDaily: parseFloat(r.avg_daily) || 0,
     overrides: {},
@@ -295,15 +304,39 @@ export default function MRPPlanner() {
     return error.message || error.details || error.hint || fallback;
   }
 
+  const fetchAllRows = useCallback(async (tableName) => {
+    const pageSize = 1000;
+    let from = 0;
+    const allRows = [];
+
+    while (true) {
+      const to = from + pageSize - 1;
+      const query = supabase.from(tableName).select("*");
+      const supportsRange = query && typeof query.range === "function";
+      const { data, error } = supportsRange
+        ? await query.range(from, to)
+        : await query;
+
+      if (error) return { data: null, error };
+
+      const chunk = data || [];
+      allRows.push(...chunk);
+      if (!supportsRange || chunk.length < pageSize) break;
+      from += pageSize;
+    }
+
+    return { data: allRows, error: null };
+  }, []);
+
   const loadFromDB = useCallback(async () => {
     try {
       setSyncMsg("Refreshing from DB...");
 
       const [skusRes, posRes, ovRes, catRes] = await Promise.all([
-        supabase.from("mrp_skus").select("*"),
-        supabase.from("mrp_open_pos").select("*"),
-        supabase.from("mrp_sku_overrides").select("*"),
-        supabase.from("mrp_category_params").select("*"),
+        fetchAllRows("mrp_skus"),
+        fetchAllRows("mrp_open_pos"),
+        fetchAllRows("mrp_sku_overrides"),
+        fetchAllRows("mrp_category_params"),
       ]);
 
       const firstError =
@@ -337,7 +370,7 @@ export default function MRPPlanner() {
       setSyncMsg("");
       return false;
     }
-  }, []);
+  }, [fetchAllRows]);
 
   const debouncedLoad = useCallback(() => {
     clearTimeout(debounceTimer.current);
@@ -672,12 +705,25 @@ export default function MRPPlanner() {
 
   const catSummary = useMemo(
     () =>
-      CATEGORIES.map((cat) => {
+      Array.from(
+        new Set([
+          ...Object.keys(catParams || {}),
+          ...enriched.map((s) => s.category).filter(Boolean),
+        ])
+      ).map((cat) => {
         const items = enriched.filter((s) => s.category === cat);
         const counts = { critical: 0, "at-risk": 0, watch: 0, ok: 0 };
         items.forEach((s) => counts[s.mrp.status]++);
         return { cat, total: items.length, ...counts };
       }),
+    [enriched, catParams]
+  );
+
+  const categoryOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(enriched.map((s) => s.category).filter(Boolean))
+      ).sort((a, b) => a.localeCompare(b)),
     [enriched]
   );
 
@@ -819,6 +865,7 @@ export default function MRPPlanner() {
           <WorkbenchView enriched={filtered} filterCat={filterCat} setFilterCat={setFilterCat}
             filterStatus={filterStatus} setFilterStatus={setFilterStatus}
             search={search} setSearch={setSearch} openPOs={openPOs}
+            categoryOptions={categoryOptions}
             onOpenDetail={s=>{setSelectedSKU(s);setView("detail");}}
             onEditParams={s=>setEditingParams(s)} catParams={catParams}/>
         )}
@@ -851,7 +898,7 @@ export default function MRPPlanner() {
 // ─────────────────────────────────────────────
 //  WORKBENCH VIEW (unchanged)
 // ─────────────────────────────────────────────
-function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterStatus,search,setSearch,openPOs,onOpenDetail,onEditParams}) {
+function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterStatus,search,setSearch,openPOs,categoryOptions,onOpenDetail,onEditParams}) {
   const PAGE_SIZE = 50;
   const [page, setPage] = useState(1);
   useEffect(()=>{setPage(1);},[filterCat,filterStatus,search]);
@@ -863,7 +910,7 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
         <input className="input" placeholder="Search SKU / name…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
         <select className="select" value={filterCat} onChange={e=>setFilterCat(e.target.value)}>
           <option>All</option>
-          {CATEGORIES.map(c=><option key={c}>{c}</option>)}
+          {categoryOptions.map(c=><option key={c}>{c}</option>)}
         </select>
         <select className="select" value={filterStatus} onChange={e=>setFilterStatus(e.target.value)}>
           <option value="All">All Status</option>
@@ -1084,16 +1131,13 @@ function ExceptionView({exceptions,onOpenDetail}) {
 function CategoryView({catSummary,catParams,setCatParams,enriched}) {
   const [editCat,setEditCat]=useState(null);
   const [draft,setDraft]=useState({});
-  const chartData=CATEGORIES.map(cat=>{
-    const items=enriched.filter(s=>s.category===cat);
-    return {
-      cat:cat.split(" ")[0],
-      critical:items.filter(s=>s.mrp.status==="critical").length,
-      "at-risk":items.filter(s=>s.mrp.status==="at-risk").length,
-      watch:items.filter(s=>s.mrp.status==="watch").length,
-      ok:items.filter(s=>s.mrp.status==="ok").length,
-    };
-  });
+  const chartData=catSummary.map(row=>({
+    cat:(row.cat||"").split(" ")[0],
+    critical:row.critical||0,
+    "at-risk":row["at-risk"]||0,
+    watch:row.watch||0,
+    ok:row.ok||0,
+  }));
   return (
     <div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:20}}>
