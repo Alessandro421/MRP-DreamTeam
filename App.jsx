@@ -154,6 +154,24 @@ function downloadFile(content, filename, mimeType) {
 //  SUPABASE SYNC HELPERS
 // ─────────────────────────────────────────────
 
+/** Fetch every row from a table, bypassing Supabase's 1000-row default limit */
+async function fetchAll(table) {
+  const PAGE = 1000;
+  let from = 0;
+  let allRows = [];
+  while (true) {
+    const { data, error } = await supabase
+      .from(table)
+      .select("*")
+      .range(from, from + PAGE - 1);
+    if (error) return { data: null, error };
+    allRows = allRows.concat(data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+  return { data: allRows, error: null };
+}
+
 /** Transform Supabase mrp_skus rows → app format */
 function dbSkusToApp(rows) {
   return rows.map(r => ({
@@ -244,10 +262,10 @@ export default function MRPPlanner() {
       setSyncMsg("Refreshing from DB...");
 
       const [skusRes, posRes, ovRes, catRes] = await Promise.all([
-        supabase.from("mrp_skus").select("*"),
-        supabase.from("mrp_open_pos").select("*"),
-        supabase.from("mrp_sku_overrides").select("*"),
-        supabase.from("mrp_category_params").select("*"),
+        fetchAll("mrp_skus"),
+        fetchAll("mrp_open_pos"),
+        fetchAll("mrp_sku_overrides"),
+        fetchAll("mrp_category_params"),
       ]);
 
       const firstError =
