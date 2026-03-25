@@ -376,6 +376,8 @@ export default function MRPPlanner() {
         moq: overrides.moq ?? null,
         order_multiple: overrides.orderMultiple ?? null,
         safety_stock: overrides.safetyStock ?? null,
+        updated_at: new Date().toISOString(),
+        uploaded_by: "shared",
       };
 
       const { error } = await supabase
@@ -384,13 +386,16 @@ export default function MRPPlanner() {
 
       if (error) {
         setSkuOverrides((prev) => ({ ...prev, [skuId]: previousOverrides }));
-        setLastDbError(formatDbError(error, "Failed to save SKU override."));
-        return;
+        const msg = formatDbError(error, "Failed to save SKU override.");
+        setLastDbError(msg);
+        console.error("[saveSkuOverride] upsert error:", error);
+        return false;
       }
 
       setLastDbError("");
       broadcastChange();
       await loadFromDB();
+      return true;
     },
     [dbStatus, skuOverrides, loadFromDB, broadcastChange]
   );
@@ -800,7 +805,7 @@ export default function MRPPlanner() {
       {editingParams&&(
         <ParamModal sku={editingParams} catParams={catParams}
           skuOverrides={skuOverrides[editingParams.id]||{}}
-          onSave={ov=>{saveSkuOverride(editingParams.id, ov);setEditingParams(null);}}
+          onSave={async ov=>{const ok=await saveSkuOverride(editingParams.id, ov);if(ok!==false)setEditingParams(null);}}
           onClose={()=>setEditingParams(null)}/>
       )}
     </div>
