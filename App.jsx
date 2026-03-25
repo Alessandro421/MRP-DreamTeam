@@ -634,133 +634,151 @@ export default function MRPPlanner() {
     realtimeStatus === "subscribed" ? "REALTIME" : realtimeStatus === "connecting" ? "RT CONN..." : "RT ERROR";
 
   return (
-    <div style={{fontFamily:"'IBM Plex Mono','Courier New',monospace",background:"#f1f5f9",minHeight:"100vh",color:"#1e293b"}}>
+    <div style={{fontFamily:"'Inter','IBM Plex Sans',sans-serif",background:"#070b14",minHeight:"100vh",color:"#e2e8f0"}}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
         *{box-sizing:border-box;margin:0;padding:0}
-        ::-webkit-scrollbar{width:5px;height:5px}
-        ::-webkit-scrollbar-track{background:#e2e8f0}
-        ::-webkit-scrollbar-thumb{background:#64748b;border-radius:4px}
-        .nav-btn{background:none;border:none;padding:10px 16px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;transition:all 0.15s;border-bottom:2px solid transparent;color:rgba(255,255,255,0.5)}
+        body{background:#070b14}
+        ::-webkit-scrollbar{width:4px;height:4px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.4);border-radius:4px}
+
+        .nav-btn{background:none;border:none;padding:0 18px;height:100%;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.04em;transition:all 0.2s;color:rgba(148,163,184,0.7);position:relative}
+        .nav-btn::after{content:'';position:absolute;bottom:0;left:18px;right:18px;height:2px;background:transparent;transition:all 0.2s;border-radius:2px 2px 0 0}
         .nav-btn:hover{color:rgba(255,255,255,0.9)}
-        .nav-btn.active{color:#ffffff;border-bottom-color:#3b82f6}
-        .sku-row{transition:background 0.1s;cursor:pointer}
-        .sku-row:hover{background:#e8edf5!important}
-        .pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:0.1em}
-        .btn{border:1px solid #cbd5e1;background:#ffffff;color:#475569;padding:6px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.15s;border-radius:3px;letter-spacing:0.04em}
-        .btn:hover{border-color:#3b82f6;color:#2563eb;background:#eff6ff}
-        .btn-primary{background:#2563eb;border-color:#2563eb;color:white}
-        .btn-primary:hover{background:#1d4ed8;border-color:#1d4ed8;color:white}
-        .btn-green{background:#16a34a;border-color:#16a34a;color:white}
-        .btn-green:hover{background:#15803d;border-color:#15803d;color:white}
-        .input{background:#ffffff;border:1px solid #cbd5e1;color:#1e293b;padding:7px 11px;font-family:'IBM Plex Mono',monospace;font-size:12px;border-radius:3px;outline:none;transition:border-color 0.15s}
-        .input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
-        .select{background:#ffffff;border:1px solid #cbd5e1;color:#1e293b;padding:7px 11px;font-family:'IBM Plex Mono',monospace;font-size:12px;border-radius:3px;outline:none;cursor:pointer;transition:border-color 0.15s}
-        .select:focus{border-color:#3b82f6}
-        .card{background:#ffffff;border:1px solid #e2e8f0;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04)}
-        .stat-card{background:#ffffff;border:1px solid #e2e8f0;border-radius:6px;padding:18px 20px 14px;box-shadow:0 1px 4px rgba(0,0,0,0.06);position:relative;overflow:hidden}
-        .tag{font-size:10px;padding:3px 7px;background:#eff6ff;color:#3b82f6;border-radius:3px;letter-spacing:0.05em;font-weight:500;border:1px solid #bfdbfe}
-        .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.55);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(2px)}
-        .modal{background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;padding:28px;min-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.18)}
+        .nav-btn.active{color:#fff}
+        .nav-btn.active::after{background:linear-gradient(90deg,#6366f1,#a78bfa)}
+
+        .sku-row{transition:all 0.15s;cursor:pointer}
+        .sku-row:hover td{background:rgba(99,102,241,0.06)!important}
+
+        .pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.08em}
+
+        .btn{border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:rgba(148,163,184,0.9);padding:7px 14px;font-family:'Inter',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;border-radius:8px}
+        .btn:hover{border-color:rgba(99,102,241,0.5);color:#fff;background:rgba(99,102,241,0.12)}
+        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);border-color:transparent;color:white;box-shadow:0 4px 14px rgba(99,102,241,0.35)}
+        .btn-primary:hover{background:linear-gradient(135deg,#818cf8,#6366f1);box-shadow:0 4px 20px rgba(99,102,241,0.5)}
+        .btn-green{background:linear-gradient(135deg,#059669,#047857);border-color:transparent;color:white;box-shadow:0 4px 14px rgba(5,150,105,0.3)}
+        .btn-green:hover{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 4px 20px rgba(5,150,105,0.45)}
+
+        .input{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#e2e8f0;padding:8px 12px;font-family:'Inter',sans-serif;font-size:12px;border-radius:8px;outline:none;transition:all 0.2s}
+        .input::placeholder{color:rgba(148,163,184,0.4)}
+        .input:focus{border-color:rgba(99,102,241,0.6);background:rgba(99,102,241,0.06);box-shadow:0 0 0 3px rgba(99,102,241,0.12)}
+        .select{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#e2e8f0;padding:8px 12px;font-family:'Inter',sans-serif;font-size:12px;border-radius:8px;outline:none;cursor:pointer;transition:all 0.2s}
+        .select:focus{border-color:rgba(99,102,241,0.6)}
+        .select option{background:#0f1629;color:#e2e8f0}
+
+        .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;backdrop-filter:blur(10px)}
+        .stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px 22px 16px;position:relative;overflow:hidden;transition:all 0.2s}
+        .stat-card:hover{border-color:rgba(255,255,255,0.14);transform:translateY(-1px)}
+
+        .tag{font-size:10px;padding:3px 9px;background:rgba(99,102,241,0.15);color:#a78bfa;border-radius:6px;letter-spacing:0.05em;font-weight:600;border:1px solid rgba(99,102,241,0.25)}
+
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(8px)}
+        .modal{background:#0f1629;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:28px;min-width:440px;box-shadow:0 25px 80px rgba(0,0,0,0.6)}
+
         table{width:100%;border-collapse:collapse}
-        th{background:#f8fafc;color:#64748b;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:11px 14px;text-align:left;border-bottom:2px solid #e2e8f0;font-weight:600}
-        td{padding:11px 14px;font-size:12px;border-bottom:1px solid #f1f5f9;color:#334155;vertical-align:middle}
-        .anim-in{animation:fadeSlide 0.2s ease}
-        @keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
-        .badge-critical{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5}
-        .badge-at-risk{background:#fff7ed;color:#ea580c;border:1px solid #fdba74}
-        .badge-watch{background:#fefce8;color:#ca8a04;border:1px solid #fde047}
-        .badge-ok{background:#f0fdf4;color:#16a34a;border:1px solid #86efac}
-        .hdr-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.85);padding:5px 11px;font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;transition:all 0.15s;border-radius:3px;letter-spacing:0.06em}
-        .hdr-btn:hover{background:rgba(255,255,255,0.16);border-color:rgba(255,255,255,0.3);color:#ffffff}
-        .hdr-btn-green{background:rgba(22,163,74,0.25);border-color:rgba(34,197,94,0.5);color:#4ade80}
-        .hdr-btn-green:hover{background:rgba(22,163,74,0.4);color:#86efac}
+        th{background:rgba(255,255,255,0.02);color:rgba(148,163,184,0.6);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:12px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);font-weight:600;font-family:'IBM Plex Mono',monospace}
+        td{padding:12px 16px;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.04);color:#cbd5e1;vertical-align:middle}
+
+        .anim-in{animation:fadeSlide 0.25s ease}
+        @keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.85)}}
+        @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+
+        .badge-critical{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
+        .badge-at-risk{background:rgba(249,115,22,0.15);color:#fb923c;border:1px solid rgba(249,115,22,0.3)}
+        .badge-watch{background:rgba(234,179,8,0.15);color:#facc15;border:1px solid rgba(234,179,8,0.3)}
+        .badge-ok{background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3)}
+
+        .hdr-action{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.75);padding:6px 13px;font-family:'Inter',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;border-radius:8px}
+        .hdr-action:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2);color:#fff}
+        .hdr-export{background:linear-gradient(135deg,#059669,#047857);border:none;color:#fff;box-shadow:0 2px 10px rgba(5,150,105,0.35)}
+        .hdr-export:hover{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 2px 16px rgba(5,150,105,0.55)}
       `}</style>
 
+      {/* BG GLOW ORBS */}
+      <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,overflow:"hidden"}}>
+        <div style={{position:"absolute",top:-200,left:-100,width:600,height:600,background:"radial-gradient(circle,rgba(99,102,241,0.12) 0%,transparent 70%)",borderRadius:"50%"}}/>
+        <div style={{position:"absolute",bottom:-150,right:-100,width:500,height:500,background:"radial-gradient(circle,rgba(6,182,212,0.08) 0%,transparent 70%)",borderRadius:"50%"}}/>
+      </div>
+
       {/* HEADER */}
-      <div style={{padding:"0 28px",display:"flex",alignItems:"center",gap:0,height:56,background:"linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%)",boxShadow:"0 2px 12px rgba(0,0,0,0.25)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,marginRight:32,flexShrink:0}}>
-          <div style={{width:28,height:28,background:"linear-gradient(135deg,#3b82f6,#1d4ed8)",borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(59,130,246,0.4)"}}>
-            <span style={{color:"white",fontSize:13,fontWeight:700,fontFamily:"'IBM Plex Sans',sans-serif"}}>M</span>
+      <div style={{position:"sticky",top:0,zIndex:50,padding:"0 28px",display:"flex",alignItems:"center",height:58,background:"rgba(7,11,20,0.85)",borderBottom:"1px solid rgba(255,255,255,0.07)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}}>
+        {/* Logo */}
+        <div style={{display:"flex",alignItems:"center",gap:10,marginRight:36,flexShrink:0}}>
+          <div style={{width:32,height:32,background:"linear-gradient(135deg,#6366f1 0%,#a78bfa 100%)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(99,102,241,0.45),inset 0 1px 0 rgba(255,255,255,0.2)"}}>
+            <span style={{color:"white",fontSize:14,fontWeight:800,letterSpacing:"-0.02em"}}>M</span>
           </div>
           <div>
-            <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:700,fontSize:13,color:"#ffffff",letterSpacing:"0.06em",lineHeight:1.2}}>MRP PLANNER</div>
-            <div style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:9,color:"rgba(148,163,184,0.9)",letterSpacing:"0.12em"}}>EMEA SUPPLY CHAIN</div>
+            <div style={{fontSize:14,fontWeight:700,color:"#ffffff",letterSpacing:"-0.02em",lineHeight:1.15}}>MRP Planner</div>
+            <div style={{fontSize:9,color:"rgba(148,163,184,0.55)",letterSpacing:"0.15em",textTransform:"uppercase",fontFamily:"'IBM Plex Mono',monospace"}}>EMEA · SUPPLY CHAIN</div>
           </div>
         </div>
-        <div style={{display:"flex",alignItems:"stretch",height:"100%"}}>
-          {["workbench","exceptions","categories","demand"].map(v=>(
-            <button key={v} className={`nav-btn${view===v||(view==="detail"&&v==="workbench")?" active":""}`}
-              onClick={()=>setView(v)}>
-              {v==="workbench"?"Planner Workbench":v==="exceptions"?`Exceptions (${exceptions.length})`:v==="categories"?"Category Summary":"Demand Analysis"}
-            </button>
+        {/* Nav */}
+        <div style={{display:"flex",alignItems:"stretch",height:"100%",gap:2}}>
+          {[
+            {k:"workbench", label:"Planner Workbench"},
+            {k:"exceptions", label:`Exceptions ${exceptions.length>0?`(${exceptions.length})`:""}` },
+            {k:"categories", label:"Categories"},
+            {k:"demand",     label:"Demand"},
+          ].map(({k,label})=>(
+            <button key={k} className={`nav-btn${view===k||(view==="detail"&&k==="workbench")?" active":""}`}
+              onClick={()=>setView(k)}>{label}</button>
           ))}
         </div>
+        {/* Actions */}
         <div style={{marginLeft:"auto",display:"flex",gap:6,alignItems:"center"}}>
           <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{display:"none"}} onChange={handleUpload}/>
-          <button className="hdr-btn" onClick={()=>fileRef.current.click()}>↑ Upload CSV</button>
-          <button className="hdr-btn" onClick={loadFromDB}>↻ Refresh</button>
-          <button className="hdr-btn hdr-btn-green" onClick={downloadResults}>↓ Export CSV</button>
-          <div style={{width:1,height:20,background:"rgba(255,255,255,0.15)",margin:"0 4px"}}/>
-          <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 9px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:3}}>
-            <div style={{width:6,height:6,background:dbDot,borderRadius:"50%",boxShadow:`0 0 5px ${dbDot}`}}/>
-            <span style={{fontSize:9,color:"rgba(148,163,184,0.9)",letterSpacing:"0.08em"}}>{dbLabel}</span>
+          <button className="hdr-action" onClick={()=>fileRef.current.click()}>↑ Upload</button>
+          <button className="hdr-action" onClick={loadFromDB}>↻ Sync</button>
+          <button className="hdr-action hdr-export" onClick={downloadResults}>↓ Export CSV</button>
+          <div style={{width:1,height:20,background:"rgba(255,255,255,0.1)",margin:"0 6px"}}/>
+          {/* DB pill */}
+          <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8}}>
+            <div style={{width:6,height:6,background:dbDot,borderRadius:"50%",boxShadow:`0 0 6px ${dbDot}`,animation:dbStatus==="loading"?"pulse 1.5s infinite":"none"}}/>
+            <span style={{fontSize:10,fontWeight:500,color:"rgba(148,163,184,0.8)",letterSpacing:"0.06em"}}>{dbLabel}</span>
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 9px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:3}}>
-            <div style={{width:6,height:6,background:rtDot,borderRadius:"50%",boxShadow:`0 0 5px ${rtDot}`,animation:realtimeStatus==="subscribed"?"pulse 2s infinite":"none"}}/>
-            <span style={{fontSize:9,color:"rgba(148,163,184,0.9)",letterSpacing:"0.08em"}}>{rtLabel}</span>
+          <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8}}>
+            <div style={{width:6,height:6,background:rtDot,borderRadius:"50%",boxShadow:`0 0 6px ${rtDot}`,animation:realtimeStatus==="subscribed"?"pulse 2s infinite":"none"}}/>
+            <span style={{fontSize:10,fontWeight:500,color:"rgba(148,163,184,0.8)",letterSpacing:"0.06em"}}>{rtLabel}</span>
           </div>
         </div>
       </div>
 
-      {/* Upload message banner */}
-      {uploadMsg&&(
-        <div style={{background:"#eff6ff",borderBottom:"1px solid #bfdbfe",padding:"7px 28px",fontSize:11,color:"#2563eb",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span>✓ {uploadMsg}</span>
-          <button style={{background:"none",border:"none",cursor:"pointer",color:"#94a3b8",fontSize:14,lineHeight:1}} onClick={()=>setUploadMsg("")}>×</button>
-        </div>
-      )}
-
-      {syncMsg && (
-        <div style={{background:"#f0fdf4",borderBottom:"1px solid #bbf7d0",padding:"7px 28px",fontSize:11,color:"#166534"}}>
-          ↻ {syncMsg}
-        </div>
-      )}
-
-      {lastDbError && (
-        <div style={{background:"#fef2f2",borderBottom:"1px solid #fecaca",padding:"7px 28px",fontSize:11,color:"#991b1b"}}>
-          ✕ DB error: {lastDbError}
-        </div>
-      )}
-
-      {dbStatus==="offline"&&(
-        <div style={{background:"#fefce8",borderBottom:"1px solid #fde047",padding:"7px 28px",fontSize:11,color:"#854d0e"}}>
-          ⚠ Supabase unreachable — showing local defaults. Check your anon key in supabaseClient.js and RLS policies.
-        </div>
-      )}
+      {/* BANNERS */}
+      <div style={{position:"relative",zIndex:1}}>
+        {uploadMsg&&(
+          <div style={{background:"rgba(99,102,241,0.12)",borderBottom:"1px solid rgba(99,102,241,0.25)",padding:"8px 28px",fontSize:11,color:"#a5b4fc",display:"flex",justifyContent:"space-between",alignItems:"center",fontWeight:500}}>
+            <span>✓ {uploadMsg}</span>
+            <button style={{background:"none",border:"none",cursor:"pointer",color:"rgba(148,163,184,0.5)",fontSize:16,lineHeight:1}} onClick={()=>setUploadMsg("")}>×</button>
+          </div>
+        )}
+        {syncMsg&&<div style={{background:"rgba(34,197,94,0.08)",borderBottom:"1px solid rgba(34,197,94,0.2)",padding:"8px 28px",fontSize:11,color:"#4ade80",fontWeight:500}}>↻ {syncMsg}</div>}
+        {lastDbError&&<div style={{background:"rgba(239,68,68,0.08)",borderBottom:"1px solid rgba(239,68,68,0.2)",padding:"8px 28px",fontSize:11,color:"#f87171",fontWeight:500}}>✕ {lastDbError}</div>}
+        {dbStatus==="offline"&&<div style={{background:"rgba(234,179,8,0.08)",borderBottom:"1px solid rgba(234,179,8,0.2)",padding:"8px 28px",fontSize:11,color:"#facc15",fontWeight:500}}>⚠ Supabase unreachable — showing local defaults.</div>}
+      </div>
 
       {/* KPI BAR */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:12,padding:"16px 28px",background:"#f1f5f9",borderBottom:"1px solid #e2e8f0"}}>
+      <div style={{position:"relative",zIndex:1,display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:10,padding:"18px 28px 14px"}}>
         {[
-          {label:"Total SKUs",     val:enriched.length,                                                    color:"#2563eb", accent:"#3b82f6", bg:"#eff6ff"},
-          {label:"Critical",       val:enriched.filter(s=>s.mrp.status==="critical").length,               color:"#dc2626", accent:"#ef4444", bg:"#fef2f2"},
-          {label:"At Risk",        val:enriched.filter(s=>s.mrp.status==="at-risk").length,                color:"#ea580c", accent:"#f97316", bg:"#fff7ed"},
-          {label:"Watch",          val:enriched.filter(s=>s.mrp.status==="watch").length,                  color:"#ca8a04", accent:"#eab308", bg:"#fefce8"},
-          {label:"OK",             val:enriched.filter(s=>s.mrp.status==="ok").length,                     color:"#16a34a", accent:"#22c55e", bg:"#f0fdf4"},
-          {label:"Planned Orders", val:Object.values(mrpResults).reduce((s,r)=>s+r.orders.length,0),       color:"#7c3aed", accent:"#8b5cf6", bg:"#faf5ff"},
+          {label:"Total SKUs",     val:enriched.length,                                                    glow:"rgba(99,102,241,0.4)",  grad:"linear-gradient(135deg,#6366f1,#818cf8)", dim:"rgba(99,102,241,0.08)"},
+          {label:"Critical",       val:enriched.filter(s=>s.mrp.status==="critical").length,               glow:"rgba(239,68,68,0.4)",   grad:"linear-gradient(135deg,#ef4444,#f87171)", dim:"rgba(239,68,68,0.08)"},
+          {label:"At Risk",        val:enriched.filter(s=>s.mrp.status==="at-risk").length,                glow:"rgba(249,115,22,0.4)",  grad:"linear-gradient(135deg,#f97316,#fb923c)", dim:"rgba(249,115,22,0.08)"},
+          {label:"Watch",          val:enriched.filter(s=>s.mrp.status==="watch").length,                  glow:"rgba(234,179,8,0.35)",  grad:"linear-gradient(135deg,#eab308,#facc15)", dim:"rgba(234,179,8,0.08)"},
+          {label:"OK",             val:enriched.filter(s=>s.mrp.status==="ok").length,                     glow:"rgba(34,197,94,0.35)",  grad:"linear-gradient(135deg,#22c55e,#4ade80)", dim:"rgba(34,197,94,0.08)"},
+          {label:"Planned Orders", val:Object.values(mrpResults).reduce((s,r)=>s+r.orders.length,0),       glow:"rgba(167,139,250,0.4)", grad:"linear-gradient(135deg,#8b5cf6,#a78bfa)", dim:"rgba(139,92,246,0.08)"},
         ].map(k=>(
-          <div key={k.label} className="stat-card" style={{borderTop:`3px solid ${k.accent}`}}>
-            <div style={{fontSize:26,fontWeight:700,color:k.color,fontFamily:"'IBM Plex Sans',sans-serif",lineHeight:1.1}}>{k.val}</div>
-            <div style={{fontSize:10,color:"#94a3b8",letterSpacing:"0.1em",textTransform:"uppercase",marginTop:5,fontWeight:500}}>{k.label}</div>
-            <div style={{position:"absolute",right:12,top:12,width:28,height:28,background:k.bg,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <div style={{width:10,height:10,background:k.accent,borderRadius:"50%",opacity:0.7}}/>
-            </div>
+          <div key={k.label} className="stat-card" style={{background:k.dim,borderColor:"rgba(255,255,255,0.07)"}}>
+            {/* glow blob */}
+            <div style={{position:"absolute",top:-20,right:-20,width:80,height:80,background:k.glow,borderRadius:"50%",filter:"blur(28px)",opacity:0.5,pointerEvents:"none"}}/>
+            <div style={{fontSize:30,fontWeight:800,letterSpacing:"-0.03em",background:k.grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1,marginBottom:8}}>{k.val}</div>
+            <div style={{fontSize:10,fontWeight:600,color:"rgba(148,163,184,0.55)",letterSpacing:"0.1em",textTransform:"uppercase"}}>{k.label}</div>
           </div>
         ))}
       </div>
 
-      <div style={{padding:"20px 28px"}} className="anim-in">
+      <div style={{position:"relative",zIndex:1,padding:"4px 28px 28px"}} className="anim-in">
         {(view==="workbench"||view==="detail")&&view!=="detail"&&(
           <WorkbenchView enriched={filtered} filterCat={filterCat} setFilterCat={setFilterCat}
             filterStatus={filterStatus} setFilterStatus={setFilterStatus}
@@ -805,7 +823,7 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
   const paged = enriched.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
   return (
     <div>
-      <div style={{display:"flex",gap:10,marginBottom:16,alignItems:"center",flexWrap:"wrap"}}>
+      <div style={{display:"flex",gap:8,marginBottom:14,alignItems:"center",flexWrap:"wrap"}}>
         <input className="input" placeholder="Search SKU / name…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
         <select className="select" value={filterCat} onChange={e=>setFilterCat(e.target.value)}>
           <option>All</option>
@@ -818,7 +836,7 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
           <option value="watch">Watch</option>
           <option value="ok">OK</option>
         </select>
-        <span style={{marginLeft:"auto",fontSize:11,color:"#475569"}}>{enriched.length} SKUs</span>
+        <span style={{marginLeft:"auto",fontSize:11,color:"rgba(148,163,184,0.5)",fontFamily:"'IBM Plex Mono',monospace",letterSpacing:"0.06em"}}>{enriched.length} SKUs</span>
       </div>
       <div className="card" style={{overflow:"auto"}}>
         <table>
@@ -894,20 +912,20 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
         <span className={`pill badge-${status}`} style={{marginLeft:8}}>{STATUS_LABEL[status]}</span>
         <button className="btn" style={{marginLeft:"auto"}} onClick={onEditParams}>Edit Parameters</button>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:12,marginBottom:20}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:10,marginBottom:20}}>
         {[
-          {label:"Current Stock",  val:Math.floor(sku.stock),           unit:"units", highlight:sku.stock<sku.safetyStock},
-          {label:"Safety Stock",   val:Math.floor(sku.safetyStock),     unit:"units"},
-          {label:"Reorder Point",  val:Math.floor(mrp.rop), unit:"units", highlight:sku.stock<=mrp.rop, color:"#7c3aed"},
-          {label:"Days of Cover",  val:mrp.daysOfStock>0?Math.floor(mrp.daysOfStock):"STCKOUT", unit:mrp.daysOfStock>0?"days":"", highlight:mrp.daysOfStock<sku.leadTime/7},
-          {label:"Lead Time",      val:sku.leadTime,        unit:"days"},
-          {label:"Avg Daily Use",  val:Math.floor(sku.avgDaily),        unit:"units/day"},
+          {label:"Current Stock",  val:Math.floor(sku.stock),           unit:"units", highlight:sku.stock<sku.safetyStock, grad:"linear-gradient(135deg,#6366f1,#818cf8)"},
+          {label:"Safety Stock",   val:Math.floor(sku.safetyStock),     unit:"units", grad:"linear-gradient(135deg,#64748b,#94a3b8)"},
+          {label:"Reorder Point",  val:Math.floor(mrp.rop), unit:"units", highlight:sku.stock<=mrp.rop, grad:"linear-gradient(135deg,#8b5cf6,#a78bfa)"},
+          {label:"Days of Cover",  val:mrp.daysOfStock>0?Math.floor(mrp.daysOfStock):"OUT", unit:mrp.daysOfStock>0?"days":"", highlight:mrp.daysOfStock<sku.leadTime/7, grad:"linear-gradient(135deg,#f97316,#fb923c)"},
+          {label:"Lead Time",      val:sku.leadTime,        unit:"days", grad:"linear-gradient(135deg,#06b6d4,#22d3ee)"},
+          {label:"Avg Daily Use",  val:Math.floor(sku.avgDaily),        unit:"units/d", grad:"linear-gradient(135deg,#10b981,#34d399)"},
         ].map(k=>(
           <div key={k.label} className="stat-card">
-            <div style={{fontSize:20,fontWeight:600,color:k.color||(k.highlight?"#dc2626":"#0f172a"),fontFamily:"'IBM Plex Sans',sans-serif"}}>
-              {k.val}<span style={{fontSize:11,color:"#94a3b8",marginLeft:4}}>{k.unit}</span>
+            <div style={{fontSize:22,fontWeight:800,letterSpacing:"-0.03em",background:k.grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1.1}}>
+              {k.val}<span style={{fontSize:10,fontWeight:500,opacity:0.6,marginLeft:4,WebkitTextFillColor:"rgba(148,163,184,0.5)"}}>{k.unit}</span>
             </div>
-            <div style={{fontSize:10,color:"#94a3b8",letterSpacing:"0.08em",textTransform:"uppercase",marginTop:3}}>{k.label}</div>
+            <div style={{fontSize:10,fontWeight:600,color:"rgba(148,163,184,0.5)",letterSpacing:"0.08em",textTransform:"uppercase",marginTop:6}}>{k.label}</div>
           </div>
         ))}
       </div>
@@ -918,14 +936,14 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
           </div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={chartData} margin={{top:5,right:20,bottom:5,left:0}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0"/>
-              <XAxis dataKey="day" stroke="#cbd5e1" tick={{fontSize:10,fill:"#94a3b8"}}/>
-              <YAxis stroke="#cbd5e1" tick={{fontSize:10,fill:"#94a3b8"}}/>
-              <Tooltip contentStyle={{background:"#ffffff",border:"1px solid #e2e8f0",borderRadius:4,fontSize:11,color:"#334155"}} labelFormatter={d=>`Day ${d}`}/>
-              <ReferenceLine y={sku.safetyStock} stroke="#ea580c" strokeDasharray="4 3" label={{value:"Safety",fill:"#ea580c",fontSize:10}}/>
-              <ReferenceLine y={mrp.rop} stroke="#7c3aed" strokeDasharray="4 3" label={{value:"ROP",fill:"#7c3aed",fontSize:10}}/>
-              <ReferenceLine y={0} stroke="#dc2626" strokeDasharray="2 2"/>
-              <Line type="monotone" dataKey="stock" stroke="#2563eb" strokeWidth={2} dot={false} name="Projected Stock"/>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)"/>
+              <XAxis dataKey="day" stroke="transparent" tick={{fontSize:10,fill:"rgba(148,163,184,0.5)"}}/>
+              <YAxis stroke="transparent" tick={{fontSize:10,fill:"rgba(148,163,184,0.5)"}}/>
+              <Tooltip contentStyle={{background:"#0f1629",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,fontSize:11,color:"#e2e8f0",boxShadow:"0 8px 30px rgba(0,0,0,0.4)"}} labelFormatter={d=>`Day ${d}`}/>
+              <ReferenceLine y={sku.safetyStock} stroke="#f97316" strokeDasharray="4 3" label={{value:"Safety",fill:"#fb923c",fontSize:9}}/>
+              <ReferenceLine y={mrp.rop} stroke="#a78bfa" strokeDasharray="4 3" label={{value:"ROP",fill:"#a78bfa",fontSize:9}}/>
+              <ReferenceLine y={0} stroke="#f87171" strokeDasharray="2 2"/>
+              <Line type="monotone" dataKey="stock" stroke="#818cf8" strokeWidth={2.5} dot={false} name="Projected Stock"/>
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -1047,26 +1065,26 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
           <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:16}}>SKU Status by Category</div>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={chartData} margin={{top:0,right:10,bottom:0,left:-10}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0"/>
-              <XAxis dataKey="cat" stroke="#cbd5e1" tick={{fontSize:10,fill:"#94a3b8"}}/>
-              <YAxis stroke="#cbd5e1" tick={{fontSize:10,fill:"#94a3b8"}}/>
-              <Tooltip contentStyle={{background:"#ffffff",border:"1px solid #e2e8f0",borderRadius:4,fontSize:11,color:"#334155"}}/>
-              <Legend wrapperStyle={{fontSize:10}}/>
-              <Bar dataKey="critical" fill="#dc2626" stackId="a"/>
-              <Bar dataKey="at-risk"  fill="#ea580c" stackId="a"/>
-              <Bar dataKey="watch"    fill="#ca8a04" stackId="a"/>
-              <Bar dataKey="ok"       fill="#16a34a" stackId="a"/>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)"/>
+              <XAxis dataKey="cat" stroke="transparent" tick={{fontSize:10,fill:"rgba(148,163,184,0.5)"}}/>
+              <YAxis stroke="transparent" tick={{fontSize:10,fill:"rgba(148,163,184,0.5)"}}/>
+              <Tooltip contentStyle={{background:"#0f1629",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,fontSize:11,color:"#e2e8f0",boxShadow:"0 8px 30px rgba(0,0,0,0.4)"}}/>
+              <Legend wrapperStyle={{fontSize:10,color:"rgba(148,163,184,0.6)"}}/>
+              <Bar dataKey="critical" fill="#ef4444" stackId="a" radius={[0,0,0,0]}/>
+              <Bar dataKey="at-risk"  fill="#f97316" stackId="a"/>
+              <Bar dataKey="watch"    fill="#eab308" stackId="a"/>
+              <Bar dataKey="ok"       fill="#22c55e" stackId="a" radius={[4,4,0,0]}/>
             </BarChart>
           </ResponsiveContainer>
         </div>
         <div className="card" style={{padding:20}}>
           <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Planning Logic</div>
-          <div style={{fontSize:11,color:"#64748b",lineHeight:1.8}}>
-            <p style={{marginBottom:8}}><span style={{color:"#7c3aed"}}>Reorder Point</span> = Safety Stock + (Avg Daily   Lead Time)</p>
-            <p style={{marginBottom:8}}><span style={{color:"#2563eb"}}>Order Qty</span> = CEIL(Net Req / Order Multiple)   OM, min MOQ</p>
-            <p style={{marginBottom:8}}><span style={{color:"#dc2626"}}>CRITICAL</span> = Projected stock &lt; 0 at horizon</p>
-            <p style={{marginBottom:8}}><span style={{color:"#ea580c"}}>AT RISK</span> = Stock &lt; Safety Stock at horizon</p>
-            <p><span style={{color:"#ca8a04"}}>WATCH</span> = Days cover &lt; Lead Time (weeks)</p>
+          <div style={{fontSize:11,color:"rgba(148,163,184,0.6)",lineHeight:2,fontFamily:"'IBM Plex Mono',monospace"}}>
+            <p style={{marginBottom:6}}><span style={{color:"#a78bfa",fontWeight:600}}>Reorder Point</span> = Safety Stock + (Avg Daily × Lead Time)</p>
+            <p style={{marginBottom:6}}><span style={{color:"#818cf8",fontWeight:600}}>Order Qty</span> = CEIL(Net Req / Order Multiple) × OM, min MOQ</p>
+            <p style={{marginBottom:6}}><span style={{color:"#f87171",fontWeight:600}}>CRITICAL</span> = Projected stock &lt; 0 at horizon</p>
+            <p style={{marginBottom:6}}><span style={{color:"#fb923c",fontWeight:600}}>AT RISK</span> = Stock &lt; Safety Stock at horizon</p>
+            <p><span style={{color:"#facc15",fontWeight:600}}>WATCH</span> = Days cover &lt; Lead Time (weeks)</p>
           </div>
         </div>
       </div>
@@ -1161,9 +1179,9 @@ function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
               onClick={()=>setDraft(d=>({...d,[f.key]:""}))} >RESET</button>
           </div>
         ))}
-        <div style={{background:"#f5f3ff",border:"1px solid #ddd6fe",borderRadius:3,padding:"10px 14px",marginTop:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={{fontSize:11,color:"#7c3aed",fontWeight:600}}>Calculated Reorder Point</span>
-          <span style={{fontSize:16,fontWeight:700,color:"#7c3aed",fontFamily:"'IBM Plex Sans',sans-serif"}}>{Math.round(rop)} units</span>
+        <div style={{background:"rgba(139,92,246,0.1)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:10,padding:"12px 16px",marginTop:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontSize:11,color:"#a78bfa",fontWeight:600,letterSpacing:"0.04em"}}>Calculated Reorder Point</span>
+          <span style={{fontSize:18,fontWeight:800,background:"linear-gradient(135deg,#8b5cf6,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"-0.02em"}}>{Math.round(rop)} <span style={{fontSize:10,fontWeight:500,WebkitTextFillColor:"rgba(148,163,184,0.5)"}}>units</span></span>
         </div>
         <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:20}}>
           <button className="btn" onClick={onClose}>Cancel</button>
