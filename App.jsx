@@ -614,13 +614,13 @@ export default function MRPPlanner() {
 
   const catSummary = useMemo(
     () =>
-      CATEGORIES.map((cat) => {
+      Object.keys(catParams).sort().map((cat) => {
         const items = enriched.filter((s) => s.category === cat);
         const counts = { critical: 0, "at-risk": 0, watch: 0, ok: 0 };
         items.forEach((s) => counts[s.mrp.status]++);
         return { cat, total: items.length, ...counts };
       }),
-    [enriched]
+    [enriched, catParams]
   );
 
   const dbDot =
@@ -765,7 +765,8 @@ export default function MRPPlanner() {
             filterStatus={filterStatus} setFilterStatus={setFilterStatus}
             search={search} setSearch={setSearch} openPOs={openPOs}
             onOpenDetail={s=>{setSelectedSKU(s);setView("detail");}}
-            onEditParams={s=>setEditingParams(s)} catParams={catParams}/>
+            onEditParams={s=>setEditingParams(s)} catParams={catParams}
+            categories={Object.keys(catParams).sort()}/>
         )}
         {view==="detail"&&selectedSKU&&(
           <DetailView sku={enriched.find(s=>s.id===selectedSKU.id)||selectedSKU} mrp={mrpResults[selectedSKU.id]}
@@ -796,7 +797,7 @@ export default function MRPPlanner() {
 // ─────────────────────────────────────────────
 //  WORKBENCH VIEW (unchanged)
 // ─────────────────────────────────────────────
-function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterStatus,search,setSearch,openPOs,onOpenDetail,onEditParams}) {
+function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterStatus,search,setSearch,openPOs,onOpenDetail,onEditParams,categories=CATEGORIES}) {
   const PAGE_SIZE = 50;
   const [page, setPage] = useState(1);
   useEffect(()=>{setPage(1);},[filterCat,filterStatus,search]);
@@ -811,7 +812,7 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
         <input className="input" placeholder="Search SKU or name…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:200}}/>
         <select className="select" value={filterCat} onChange={e=>setFilterCat(e.target.value)}>
           <option>All</option>
-          {CATEGORIES.map(c=><option key={c}>{c}</option>)}
+          {categories.map(c=><option key={c}>{c}</option>)}
         </select>
         <select className="select" value={filterStatus} onChange={e=>setFilterStatus(e.target.value)}>
           <option value="All">All Status</option>
@@ -1037,7 +1038,7 @@ function ExceptionView({exceptions,onOpenDetail}) {
 function CategoryView({catSummary,catParams,setCatParams,enriched}) {
   const [editCat,setEditCat]=useState(null);
   const [draft,setDraft]=useState({});
-  const chartData=CATEGORIES.map(cat=>{
+  const chartData=Object.keys(catParams).sort().map(cat=>{
     const items=enriched.filter(s=>s.category===cat);
     return {
       cat:cat.split(" ")[0],
