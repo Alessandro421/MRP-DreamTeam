@@ -238,16 +238,33 @@ export default function MRPPlanner() {
     if (!error) return fallback;
     return error.message || error.details || error.hint || fallback;
   }
+  async function fetchAllRows(table) {
+        const PAGE_SIZE = 1000;
+        let allRows = [];
+        let from = 0;
+        while (true) {
+                const { data, error } = await supabase
+                  .from(table)
+                  .select("*")
+                  .range(from, from + PAGE_SIZE - 1);
+                if (error) return { data: allRows, error };
+                allRows = allRows.concat(data);
+                if (data.length < PAGE_SIZE) break;
+                from += PAGE_SIZE;
+        }
+        return { data: allRows, error: null };
+  }
 
+  
   const loadFromDB = useCallback(async () => {
     try {
       setSyncMsg("Refreshing from DB...");
 
       const [skusRes, posRes, ovRes, catRes] = await Promise.all([
-        supabase.from("mrp_skus").select("*"),
-        supabase.from("mrp_open_pos").select("*"),
-        supabase.from("mrp_sku_overrides").select("*"),
-        supabase.from("mrp_category_params").select("*"),
+      fetchAllRows("mrp_skus"),
+              fetchAllRows("mrp_open_pos"),
+              fetchAllRows("mrp_sku_overrides"),
+              fetchAllRows("mrp_category_params"),
       ]);
 
       const firstError =
