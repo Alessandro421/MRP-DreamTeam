@@ -298,6 +298,17 @@ export default function MRPPlanner() {
     loadFromDB();
   }, [loadFromDB]);
 
+  // ── Refresh when tab becomes visible again ──
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadFromDB();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [loadFromDB]);
+
   // ── Realtime subscription: auto-refresh when DB changes ──
   useEffect(() => {
     setRealtimeStatus("connecting");
@@ -338,10 +349,10 @@ export default function MRPPlanner() {
 
     channelRef.current = channel;
 
-    // Polling fallback: refresh every 30 seconds in case realtime misses events
+    // Polling fallback: refresh every 15 seconds in case realtime misses events
     pollTimer.current = setInterval(() => {
       loadFromDB();
-    }, 30000);
+    }, 15000);
 
     return () => {
       supabase.removeChannel(channel);
