@@ -634,151 +634,132 @@ export default function MRPPlanner() {
     realtimeStatus === "subscribed" ? "REALTIME" : realtimeStatus === "connecting" ? "RT CONN..." : "RT ERROR";
 
   return (
-    <div style={{fontFamily:"'Inter','IBM Plex Sans',sans-serif",background:"#070b14",minHeight:"100vh",color:"#e2e8f0"}}>
+    <div style={{fontFamily:"'Salesforce Sans','Inter',Arial,sans-serif",background:"#f3f3f3",minHeight:"100vh",color:"#181818"}}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         *{box-sizing:border-box;margin:0;padding:0}
-        body{background:#070b14}
-        ::-webkit-scrollbar{width:4px;height:4px}
-        ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.4);border-radius:4px}
+        body{background:#f3f3f3}
+        ::-webkit-scrollbar{width:6px;height:6px}
+        ::-webkit-scrollbar-track{background:#f3f3f3}
+        ::-webkit-scrollbar-thumb{background:#dddbda;border-radius:4px}
 
-        .nav-btn{background:none;border:none;padding:0 18px;height:100%;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.04em;transition:all 0.2s;color:rgba(148,163,184,0.7);position:relative}
-        .nav-btn::after{content:'';position:absolute;bottom:0;left:18px;right:18px;height:2px;background:transparent;transition:all 0.2s;border-radius:2px 2px 0 0}
-        .nav-btn:hover{color:rgba(255,255,255,0.9)}
-        .nav-btn.active{color:#fff}
-        .nav-btn.active::after{background:linear-gradient(90deg,#6366f1,#a78bfa)}
+        .nav-btn{background:none;border:none;padding:0 16px;height:100%;cursor:pointer;font-family:'Inter',Arial,sans-serif;font-size:13px;font-weight:400;transition:all 0.15s;color:#3e3e3c;position:relative;white-space:nowrap}
+        .nav-btn:hover{color:#0176d3;background:#f3f2f2}
+        .nav-btn.active{color:#0176d3;font-weight:600;box-shadow:inset 0 -3px 0 #0176d3}
 
-        .sku-row{transition:all 0.15s;cursor:pointer}
-        .sku-row:hover td{background:rgba(99,102,241,0.06)!important}
+        .sku-row{transition:background 0.1s;cursor:pointer}
+        .sku-row:hover td{background:#f3f2f2!important}
 
-        .pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.08em}
+        .pill{display:inline-flex;align-items:center;padding:2px 10px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:0.02em}
 
-        .btn{border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:rgba(148,163,184,0.9);padding:7px 14px;font-family:'Inter',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;border-radius:8px}
-        .btn:hover{border-color:rgba(99,102,241,0.5);color:#fff;background:rgba(99,102,241,0.12)}
-        .btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);border-color:transparent;color:white;box-shadow:0 4px 14px rgba(99,102,241,0.35)}
-        .btn-primary:hover{background:linear-gradient(135deg,#818cf8,#6366f1);box-shadow:0 4px 20px rgba(99,102,241,0.5)}
-        .btn-green{background:linear-gradient(135deg,#059669,#047857);border-color:transparent;color:white;box-shadow:0 4px 14px rgba(5,150,105,0.3)}
-        .btn-green:hover{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 4px 20px rgba(5,150,105,0.45)}
+        .btn{border:1px solid #dddbda;background:#fff;color:#3e3e3c;padding:7px 16px;font-family:'Inter',Arial,sans-serif;font-size:13px;font-weight:400;cursor:pointer;transition:all 0.15s;border-radius:4px}
+        .btn:hover{border-color:#0176d3;color:#0176d3;background:#f3f8fd}
+        .btn:disabled{opacity:0.4;cursor:not-allowed}
+        .btn-primary{background:#0176d3;border-color:#0176d3;color:white;font-weight:600}
+        .btn-primary:hover{background:#0160ae;border-color:#0160ae;color:white}
+        .btn-green{background:#2e844a;border-color:#2e844a;color:white;font-weight:600}
+        .btn-green:hover{background:#236b3b;border-color:#236b3b;color:white}
 
-        .input{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#e2e8f0;padding:8px 12px;font-family:'Inter',sans-serif;font-size:12px;border-radius:8px;outline:none;transition:all 0.2s}
-        .input::placeholder{color:rgba(148,163,184,0.4)}
-        .input:focus{border-color:rgba(99,102,241,0.6);background:rgba(99,102,241,0.06);box-shadow:0 0 0 3px rgba(99,102,241,0.12)}
-        .select{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#e2e8f0;padding:8px 12px;font-family:'Inter',sans-serif;font-size:12px;border-radius:8px;outline:none;cursor:pointer;transition:all 0.2s}
-        .select:focus{border-color:rgba(99,102,241,0.6)}
-        .select option{background:#0f1629;color:#e2e8f0}
+        .input{background:#fff;border:1px solid #dddbda;color:#181818;padding:8px 12px;font-family:'Inter',Arial,sans-serif;font-size:13px;border-radius:4px;outline:none;transition:border-color 0.15s,box-shadow 0.15s;height:36px}
+        .input::placeholder{color:#939393}
+        .input:focus{border-color:#0176d3;box-shadow:0 0 3px 0 rgba(1,118,211,0.5)}
+        .select{background:#fff;border:1px solid #dddbda;color:#181818;padding:7px 12px;font-family:'Inter',Arial,sans-serif;font-size:13px;border-radius:4px;outline:none;cursor:pointer;transition:border-color 0.15s;height:36px}
+        .select:focus{border-color:#0176d3;box-shadow:0 0 3px 0 rgba(1,118,211,0.5)}
 
-        .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;backdrop-filter:blur(10px)}
-        .stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px 22px 16px;position:relative;overflow:hidden;transition:all 0.2s}
-        .stat-card:hover{border-color:rgba(255,255,255,0.14);transform:translateY(-1px)}
+        .card{background:#fff;border:1px solid #dddbda;border-radius:4px;box-shadow:0 2px 3px rgba(0,0,0,0.07)}
+        .stat-card{background:#fff;border:1px solid #dddbda;border-radius:4px;padding:16px 20px;box-shadow:0 2px 3px rgba(0,0,0,0.07);position:relative;overflow:hidden;transition:box-shadow 0.15s}
+        .stat-card:hover{box-shadow:0 4px 10px rgba(0,0,0,0.12)}
 
-        .tag{font-size:10px;padding:3px 9px;background:rgba(99,102,241,0.15);color:#a78bfa;border-radius:6px;letter-spacing:0.05em;font-weight:600;border:1px solid rgba(99,102,241,0.25)}
+        .tag{font-size:11px;padding:2px 8px;background:#e8f4fd;color:#0176d3;border-radius:4px;font-weight:600;border:1px solid #b0d4f0}
 
-        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(8px)}
-        .modal{background:#0f1629;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:28px;min-width:440px;box-shadow:0 25px 80px rgba(0,0,0,0.6)}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000}
+        .modal{background:#fff;border:1px solid #dddbda;border-radius:4px;padding:0;min-width:460px;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
 
         table{width:100%;border-collapse:collapse}
-        th{background:rgba(255,255,255,0.02);color:rgba(148,163,184,0.6);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:12px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);font-weight:600;font-family:'IBM Plex Mono',monospace}
-        td{padding:12px 16px;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.04);color:#cbd5e1;vertical-align:middle}
+        th{background:#f3f3f3;color:#3e3e3c;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;padding:10px 16px;text-align:left;border-bottom:1px solid #dddbda;font-weight:700;white-space:nowrap}
+        td{padding:10px 16px;font-size:13px;border-bottom:1px solid #e0e0e0;color:#3e3e3c;vertical-align:middle}
 
-        .anim-in{animation:fadeSlide 0.25s ease}
-        @keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.85)}}
-        @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+        .anim-in{animation:fadeSlide 0.2s ease}
+        @keyframes fadeSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
-        .badge-critical{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
-        .badge-at-risk{background:rgba(249,115,22,0.15);color:#fb923c;border:1px solid rgba(249,115,22,0.3)}
-        .badge-watch{background:rgba(234,179,8,0.15);color:#facc15;border:1px solid rgba(234,179,8,0.3)}
-        .badge-ok{background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3)}
+        .badge-critical{background:#fce9e9;color:#ba0517}
+        .badge-at-risk{background:#fff3e0;color:#dd7a01}
+        .badge-watch{background:#fff9c4;color:#706504}
+        .badge-ok{background:#e8f5e9;color:#2e844a}
 
-        .hdr-action{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.75);padding:6px 13px;font-family:'Inter',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;border-radius:8px}
-        .hdr-action:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2);color:#fff}
-        .hdr-export{background:linear-gradient(135deg,#059669,#047857);border:none;color:#fff;box-shadow:0 2px 10px rgba(5,150,105,0.35)}
-        .hdr-export:hover{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 2px 16px rgba(5,150,105,0.55)}
+        .slds-section-title{font-size:12px;font-weight:700;color:#3e3e3c;text-transform:uppercase;letter-spacing:0.06em;padding:0 0 10px;border-bottom:1px solid #dddbda;margin-bottom:14px}
+
+        .page-header{background:#fff;border-bottom:1px solid #dddbda;padding:12px 24px;display:flex;align-items:center;gap:12px;margin-bottom:16px;border-radius:4px;box-shadow:0 2px 3px rgba(0,0,0,0.07)}
       `}</style>
 
-      {/* BG GLOW ORBS */}
-      <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,overflow:"hidden"}}>
-        <div style={{position:"absolute",top:-200,left:-100,width:600,height:600,background:"radial-gradient(circle,rgba(99,102,241,0.12) 0%,transparent 70%)",borderRadius:"50%"}}/>
-        <div style={{position:"absolute",bottom:-150,right:-100,width:500,height:500,background:"radial-gradient(circle,rgba(6,182,212,0.08) 0%,transparent 70%)",borderRadius:"50%"}}/>
-      </div>
-
-      {/* HEADER */}
-      <div style={{position:"sticky",top:0,zIndex:50,padding:"0 28px",display:"flex",alignItems:"center",height:58,background:"rgba(7,11,20,0.85)",borderBottom:"1px solid rgba(255,255,255,0.07)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}}>
-        {/* Logo */}
-        <div style={{display:"flex",alignItems:"center",gap:10,marginRight:36,flexShrink:0}}>
-          <div style={{width:32,height:32,background:"linear-gradient(135deg,#6366f1 0%,#a78bfa 100%)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(99,102,241,0.45),inset 0 1px 0 rgba(255,255,255,0.2)"}}>
-            <span style={{color:"white",fontSize:14,fontWeight:800,letterSpacing:"-0.02em"}}>M</span>
+      {/* GLOBAL HEADER — SLDS dark navy */}
+      <div style={{background:"#032D60",height:52,display:"flex",alignItems:"center",padding:"0 16px",gap:0,position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 4px rgba(0,0,0,0.3)"}}>
+        {/* Logo/Brand */}
+        <div style={{display:"flex",alignItems:"center",gap:10,paddingRight:20,borderRight:"1px solid rgba(255,255,255,0.15)",marginRight:16,flexShrink:0}}>
+          <div style={{width:28,height:28,background:"#0176d3",borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid rgba(255,255,255,0.25)"}}>
+            <span style={{color:"white",fontSize:14,fontWeight:800}}>M</span>
           </div>
           <div>
-            <div style={{fontSize:14,fontWeight:700,color:"#ffffff",letterSpacing:"-0.02em",lineHeight:1.15}}>MRP Planner</div>
-            <div style={{fontSize:9,color:"rgba(148,163,184,0.55)",letterSpacing:"0.15em",textTransform:"uppercase",fontFamily:"'IBM Plex Mono',monospace"}}>EMEA · SUPPLY CHAIN</div>
+            <div style={{fontSize:14,fontWeight:700,color:"#ffffff",letterSpacing:"0.01em",lineHeight:1.2}}>MRP Planner</div>
+            <div style={{fontSize:10,color:"rgba(255,255,255,0.55)",letterSpacing:"0.06em",textTransform:"uppercase"}}>EMEA Supply Chain</div>
           </div>
         </div>
-        {/* Nav */}
-        <div style={{display:"flex",alignItems:"stretch",height:"100%",gap:2}}>
+        {/* Nav tabs */}
+        <div style={{display:"flex",alignItems:"stretch",height:"100%",flex:1}}>
           {[
             {k:"workbench", label:"Planner Workbench"},
-            {k:"exceptions", label:`Exceptions ${exceptions.length>0?`(${exceptions.length})`:""}` },
-            {k:"categories", label:"Categories"},
-            {k:"demand",     label:"Demand"},
+            {k:"exceptions",label:`Exceptions${exceptions.length>0?` (${exceptions.length})`:""}` },
+            {k:"categories",label:"Category Summary"},
+            {k:"demand",    label:"Demand Analysis"},
           ].map(({k,label})=>(
-            <button key={k} className={`nav-btn${view===k||(view==="detail"&&k==="workbench")?" active":""}`}
+            <button key={k}
+              style={{background:"none",border:"none",padding:"0 16px",height:"100%",cursor:"pointer",fontFamily:"'Inter',Arial,sans-serif",fontSize:13,fontWeight:view===k||(view==="detail"&&k==="workbench")?700:400,color:view===k||(view==="detail"&&k==="workbench")?"#fff":"rgba(255,255,255,0.65)",transition:"all 0.15s",borderBottom:view===k||(view==="detail"&&k==="workbench")?"3px solid #1589ee":"3px solid transparent",whiteSpace:"nowrap"}}
               onClick={()=>setView(k)}>{label}</button>
           ))}
         </div>
-        {/* Actions */}
-        <div style={{marginLeft:"auto",display:"flex",gap:6,alignItems:"center"}}>
+        {/* Right actions */}
+        <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
           <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{display:"none"}} onChange={handleUpload}/>
-          <button className="hdr-action" onClick={()=>fileRef.current.click()}>↑ Upload</button>
-          <button className="hdr-action" onClick={loadFromDB}>↻ Sync</button>
-          <button className="hdr-action hdr-export" onClick={downloadResults}>↓ Export CSV</button>
-          <div style={{width:1,height:20,background:"rgba(255,255,255,0.1)",margin:"0 6px"}}/>
-          {/* DB pill */}
-          <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8}}>
-            <div style={{width:6,height:6,background:dbDot,borderRadius:"50%",boxShadow:`0 0 6px ${dbDot}`,animation:dbStatus==="loading"?"pulse 1.5s infinite":"none"}}/>
-            <span style={{fontSize:10,fontWeight:500,color:"rgba(148,163,184,0.8)",letterSpacing:"0.06em"}}>{dbLabel}</span>
+          <button onClick={()=>fileRef.current.click()} style={{background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.2)",color:"#fff",padding:"5px 12px",borderRadius:4,fontFamily:"'Inter',Arial,sans-serif",fontSize:12,fontWeight:500,cursor:"pointer",transition:"background 0.15s"}} onMouseOver={e=>e.target.style.background="rgba(255,255,255,0.18)"} onMouseOut={e=>e.target.style.background="rgba(255,255,255,0.1)"}>↑ Upload</button>
+          <button onClick={loadFromDB} style={{background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.2)",color:"#fff",padding:"5px 12px",borderRadius:4,fontFamily:"'Inter',Arial,sans-serif",fontSize:12,fontWeight:500,cursor:"pointer",transition:"background 0.15s"}} onMouseOver={e=>e.target.style.background="rgba(255,255,255,0.18)"} onMouseOut={e=>e.target.style.background="rgba(255,255,255,0.1)"}>↻ Sync</button>
+          <button onClick={downloadResults} style={{background:"#2e844a",border:"1px solid #236b3b",color:"#fff",padding:"5px 12px",borderRadius:4,fontFamily:"'Inter',Arial,sans-serif",fontSize:12,fontWeight:600,cursor:"pointer"}}>↓ Export CSV</button>
+          <div style={{width:1,height:20,background:"rgba(255,255,255,0.2)",margin:"0 6px"}}/>
+          <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:4}}>
+            <div style={{width:7,height:7,background:dbDot,borderRadius:"50%",boxShadow:`0 0 5px ${dbDot}`,animation:dbStatus==="loading"?"pulse 1.5s infinite":"none"}}/>
+            <span style={{fontSize:10,fontWeight:600,color:"rgba(255,255,255,0.75)",letterSpacing:"0.06em"}}>{dbLabel}</span>
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:8}}>
-            <div style={{width:6,height:6,background:rtDot,borderRadius:"50%",boxShadow:`0 0 6px ${rtDot}`,animation:realtimeStatus==="subscribed"?"pulse 2s infinite":"none"}}/>
-            <span style={{fontSize:10,fontWeight:500,color:"rgba(148,163,184,0.8)",letterSpacing:"0.06em"}}>{rtLabel}</span>
+          <div style={{display:"flex",alignItems:"center",gap:5,padding:"4px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:4}}>
+            <div style={{width:7,height:7,background:rtDot,borderRadius:"50%",animation:realtimeStatus==="subscribed"?"pulse 2s infinite":"none"}}/>
+            <span style={{fontSize:10,fontWeight:600,color:"rgba(255,255,255,0.75)",letterSpacing:"0.06em"}}>{rtLabel}</span>
           </div>
         </div>
       </div>
 
       {/* BANNERS */}
-      <div style={{position:"relative",zIndex:1}}>
-        {uploadMsg&&(
-          <div style={{background:"rgba(99,102,241,0.12)",borderBottom:"1px solid rgba(99,102,241,0.25)",padding:"8px 28px",fontSize:11,color:"#a5b4fc",display:"flex",justifyContent:"space-between",alignItems:"center",fontWeight:500}}>
-            <span>✓ {uploadMsg}</span>
-            <button style={{background:"none",border:"none",cursor:"pointer",color:"rgba(148,163,184,0.5)",fontSize:16,lineHeight:1}} onClick={()=>setUploadMsg("")}>×</button>
-          </div>
-        )}
-        {syncMsg&&<div style={{background:"rgba(34,197,94,0.08)",borderBottom:"1px solid rgba(34,197,94,0.2)",padding:"8px 28px",fontSize:11,color:"#4ade80",fontWeight:500}}>↻ {syncMsg}</div>}
-        {lastDbError&&<div style={{background:"rgba(239,68,68,0.08)",borderBottom:"1px solid rgba(239,68,68,0.2)",padding:"8px 28px",fontSize:11,color:"#f87171",fontWeight:500}}>✕ {lastDbError}</div>}
-        {dbStatus==="offline"&&<div style={{background:"rgba(234,179,8,0.08)",borderBottom:"1px solid rgba(234,179,8,0.2)",padding:"8px 28px",fontSize:11,color:"#facc15",fontWeight:500}}>⚠ Supabase unreachable — showing local defaults.</div>}
-      </div>
+      {uploadMsg&&<div style={{background:"#e8f4fd",borderBottom:"1px solid #b0d4f0",padding:"8px 24px",fontSize:12,color:"#0176d3",display:"flex",justifyContent:"space-between",alignItems:"center",fontWeight:500}}><span>✓ {uploadMsg}</span><button style={{background:"none",border:"none",cursor:"pointer",color:"#706e6b",fontSize:16}} onClick={()=>setUploadMsg("")}>×</button></div>}
+      {syncMsg&&<div style={{background:"#e8f5e9",borderBottom:"1px solid #a3d9a5",padding:"8px 24px",fontSize:12,color:"#2e844a",fontWeight:500}}>✓ {syncMsg}</div>}
+      {lastDbError&&<div style={{background:"#fce9e9",borderBottom:"1px solid #f5b0b0",padding:"8px 24px",fontSize:12,color:"#ba0517",fontWeight:500}}>✕ DB Error: {lastDbError}</div>}
+      {dbStatus==="offline"&&<div style={{background:"#fff3e0",borderBottom:"1px solid #ffcc80",padding:"8px 24px",fontSize:12,color:"#dd7a01",fontWeight:500}}>⚠ Supabase unreachable — showing local defaults.</div>}
 
-      {/* KPI BAR */}
-      <div style={{position:"relative",zIndex:1,display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:10,padding:"18px 28px 14px"}}>
+      {/* KPI SUMMARY BAR */}
+      <div style={{background:"#fff",borderBottom:"1px solid #dddbda",padding:"12px 24px",display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:1}}>
         {[
-          {label:"Total SKUs",     val:enriched.length,                                                    glow:"rgba(99,102,241,0.4)",  grad:"linear-gradient(135deg,#6366f1,#818cf8)", dim:"rgba(99,102,241,0.08)"},
-          {label:"Critical",       val:enriched.filter(s=>s.mrp.status==="critical").length,               glow:"rgba(239,68,68,0.4)",   grad:"linear-gradient(135deg,#ef4444,#f87171)", dim:"rgba(239,68,68,0.08)"},
-          {label:"At Risk",        val:enriched.filter(s=>s.mrp.status==="at-risk").length,                glow:"rgba(249,115,22,0.4)",  grad:"linear-gradient(135deg,#f97316,#fb923c)", dim:"rgba(249,115,22,0.08)"},
-          {label:"Watch",          val:enriched.filter(s=>s.mrp.status==="watch").length,                  glow:"rgba(234,179,8,0.35)",  grad:"linear-gradient(135deg,#eab308,#facc15)", dim:"rgba(234,179,8,0.08)"},
-          {label:"OK",             val:enriched.filter(s=>s.mrp.status==="ok").length,                     glow:"rgba(34,197,94,0.35)",  grad:"linear-gradient(135deg,#22c55e,#4ade80)", dim:"rgba(34,197,94,0.08)"},
-          {label:"Planned Orders", val:Object.values(mrpResults).reduce((s,r)=>s+r.orders.length,0),       glow:"rgba(167,139,250,0.4)", grad:"linear-gradient(135deg,#8b5cf6,#a78bfa)", dim:"rgba(139,92,246,0.08)"},
-        ].map(k=>(
-          <div key={k.label} className="stat-card" style={{background:k.dim,borderColor:"rgba(255,255,255,0.07)"}}>
-            {/* glow blob */}
-            <div style={{position:"absolute",top:-20,right:-20,width:80,height:80,background:k.glow,borderRadius:"50%",filter:"blur(28px)",opacity:0.5,pointerEvents:"none"}}/>
-            <div style={{fontSize:30,fontWeight:800,letterSpacing:"-0.03em",background:k.grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1,marginBottom:8}}>{k.val}</div>
-            <div style={{fontSize:10,fontWeight:600,color:"rgba(148,163,184,0.55)",letterSpacing:"0.1em",textTransform:"uppercase"}}>{k.label}</div>
+          {label:"Total SKUs",    val:enriched.length,                                                  color:"#0176d3",  bg:"#f3f8fd"},
+          {label:"Critical",      val:enriched.filter(s=>s.mrp.status==="critical").length,             color:"#ba0517",  bg:"#fce9e9"},
+          {label:"At Risk",       val:enriched.filter(s=>s.mrp.status==="at-risk").length,              color:"#dd7a01",  bg:"#fff3e0"},
+          {label:"Watch",         val:enriched.filter(s=>s.mrp.status==="watch").length,                color:"#706504",  bg:"#fffde0"},
+          {label:"OK",            val:enriched.filter(s=>s.mrp.status==="ok").length,                   color:"#2e844a",  bg:"#e8f5e9"},
+          {label:"Planned Orders",val:Object.values(mrpResults).reduce((s,r)=>s+r.orders.length,0),    color:"#5c4aad",  bg:"#f3eeff"},
+        ].map((k,i)=>(
+          <div key={k.label} style={{padding:"8px 20px",borderLeft:i>0?"1px solid #e8e8e8":"none",background:k.bg}}>
+            <div style={{fontSize:28,fontWeight:700,color:k.color,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>{k.val}</div>
+            <div style={{fontSize:11,color:"#3e3e3c",fontWeight:600,marginTop:4,textTransform:"uppercase",letterSpacing:"0.04em"}}>{k.label}</div>
           </div>
         ))}
       </div>
 
-      <div style={{position:"relative",zIndex:1,padding:"4px 28px 28px"}} className="anim-in">
+      <div style={{padding:"16px 24px 32px"}} className="anim-in">
         {(view==="workbench"||view==="detail")&&view!=="detail"&&(
           <WorkbenchView enriched={filtered} filterCat={filterCat} setFilterCat={setFilterCat}
             filterStatus={filterStatus} setFilterStatus={setFilterStatus}
@@ -823,8 +804,11 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
   const paged = enriched.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
   return (
     <div>
-      <div style={{display:"flex",gap:8,marginBottom:14,alignItems:"center",flexWrap:"wrap"}}>
-        <input className="input" placeholder="Search SKU / name…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:220}}/>
+      {/* SLDS List Header */}
+      <div style={{display:"flex",gap:8,marginBottom:12,alignItems:"center",flexWrap:"wrap",padding:"12px 16px",background:"#fff",border:"1px solid #dddbda",borderRadius:"4px 4px 0 0",borderBottom:"none"}}>
+        <span style={{fontSize:13,fontWeight:700,color:"#181818",marginRight:8}}>SKU List</span>
+        <span style={{fontSize:12,color:"#706e6b",marginRight:"auto"}}>{enriched.length} items</span>
+        <input className="input" placeholder="Search SKU or name…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:200}}/>
         <select className="select" value={filterCat} onChange={e=>setFilterCat(e.target.value)}>
           <option>All</option>
           {CATEGORIES.map(c=><option key={c}>{c}</option>)}
@@ -836,9 +820,8 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
           <option value="watch">Watch</option>
           <option value="ok">OK</option>
         </select>
-        <span style={{marginLeft:"auto",fontSize:11,color:"rgba(148,163,184,0.5)",fontFamily:"'IBM Plex Mono',monospace",letterSpacing:"0.06em"}}>{enriched.length} SKUs</span>
       </div>
-      <div className="card" style={{overflow:"auto"}}>
+      <div className="card" style={{overflow:"auto",borderRadius:"0 0 4px 4px"}}>
         <table>
           <thead>
             <tr>
@@ -880,14 +863,14 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
           </tbody>
         </table>
         {totalPages>1&&(
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderTop:"1px solid #e2e8f0",background:"#f8fafc"}}>
-            <span style={{fontSize:11,color:"#64748b"}}>
-              {(page-1)*PAGE_SIZE+1}–{Math.min(page*PAGE_SIZE,enriched.length)} di {enriched.length} SKU
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px",borderTop:"1px solid #dddbda",background:"#fafaf9"}}>
+            <span style={{fontSize:12,color:"#706e6b"}}>
+              {(page-1)*PAGE_SIZE+1}–{Math.min(page*PAGE_SIZE,enriched.length)} of {enriched.length} items
             </span>
             <div style={{display:"flex",gap:4,alignItems:"center"}}>
-              <button className="btn" style={{padding:"3px 10px",fontSize:11}} disabled={page===1} onClick={()=>setPage(p=>p-1)}>‹ Prec</button>
-              <span style={{padding:"3px 10px",fontSize:11,color:"#334155"}}>{page} / {totalPages}</span>
-              <button className="btn" style={{padding:"3px 10px",fontSize:11}} disabled={page===totalPages} onClick={()=>setPage(p=>p+1)}>Succ ›</button>
+              <button className="btn" style={{padding:"4px 12px",fontSize:12}} disabled={page===1} onClick={()=>setPage(p=>p-1)}>‹ Previous</button>
+              <span style={{padding:"4px 12px",fontSize:12,color:"#3e3e3c",background:"#e8f4fd",borderRadius:4,fontWeight:600}}>Page {page} / {totalPages}</span>
+              <button className="btn" style={{padding:"4px 12px",fontSize:12}} disabled={page===totalPages} onClick={()=>setPage(p=>p+1)}>Next ›</button>
             </div>
           </div>
         )}
@@ -904,53 +887,57 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
   const status = mrp.status;
   return (
     <div>
-      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-        <button className="btn" onClick={onBack}>← Back</button>
-        <span style={{color:"#2563eb",fontWeight:600,fontSize:16}}>{sku.id}</span>
-        <span style={{color:"#0f172a",fontSize:14}}>{sku.name}</span>
-        <span className="tag">{sku.category}</span>
-        <span className={`pill badge-${status}`} style={{marginLeft:8}}>{STATUS_LABEL[status]}</span>
-        <button className="btn" style={{marginLeft:"auto"}} onClick={onEditParams}>Edit Parameters</button>
+      {/* SLDS Page Header */}
+      <div className="page-header" style={{marginBottom:16}}>
+        <button className="btn" onClick={onBack} style={{fontSize:12,padding:"5px 12px"}}>← Back</button>
+        <div style={{width:1,height:24,background:"#dddbda",margin:"0 4px"}}/>
+        <div style={{flex:1}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+            <span style={{fontSize:18,fontWeight:700,color:"#0176d3",letterSpacing:"0.01em"}}>{sku.id}</span>
+            <span style={{fontSize:15,color:"#181818",fontWeight:500}}>{sku.name}</span>
+            <span className="tag">{sku.category}</span>
+            <span className={`pill badge-${status}`}>{STATUS_LABEL[status]}</span>
+          </div>
+        </div>
+        <button className="btn btn-primary" style={{fontSize:12,padding:"6px 16px"}} onClick={onEditParams}>Edit Parameters</button>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:10,marginBottom:20}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:12,marginBottom:20}}>
         {[
-          {label:"Current Stock",  val:Math.floor(sku.stock),           unit:"units", highlight:sku.stock<sku.safetyStock, grad:"linear-gradient(135deg,#6366f1,#818cf8)"},
-          {label:"Safety Stock",   val:Math.floor(sku.safetyStock),     unit:"units", grad:"linear-gradient(135deg,#64748b,#94a3b8)"},
-          {label:"Reorder Point",  val:Math.floor(mrp.rop), unit:"units", highlight:sku.stock<=mrp.rop, grad:"linear-gradient(135deg,#8b5cf6,#a78bfa)"},
-          {label:"Days of Cover",  val:mrp.daysOfStock>0?Math.floor(mrp.daysOfStock):"OUT", unit:mrp.daysOfStock>0?"days":"", highlight:mrp.daysOfStock<sku.leadTime/7, grad:"linear-gradient(135deg,#f97316,#fb923c)"},
-          {label:"Lead Time",      val:sku.leadTime,        unit:"days", grad:"linear-gradient(135deg,#06b6d4,#22d3ee)"},
-          {label:"Avg Daily Use",  val:Math.floor(sku.avgDaily),        unit:"units/d", grad:"linear-gradient(135deg,#10b981,#34d399)"},
+          {label:"Current Stock",  val:Math.floor(sku.stock),                                          unit:"units",  color:sku.stock<sku.safetyStock?"#ba0517":"#181818", border:sku.stock<sku.safetyStock?"3px solid #ba0517":"3px solid #dddbda"},
+          {label:"Safety Stock",   val:Math.floor(sku.safetyStock),                                    unit:"units",  color:"#3e3e3c", border:"3px solid #dddbda"},
+          {label:"Reorder Point",  val:Math.floor(mrp.rop),                                            unit:"units",  color:"#5c4aad", border:"3px solid #5c4aad"},
+          {label:"Days of Cover",  val:mrp.daysOfStock>0?Math.floor(mrp.daysOfStock):"STOCKOUT",       unit:mrp.daysOfStock>0?"days":"", color:mrp.daysOfStock<sku.leadTime/7?"#dd7a01":"#181818", border:mrp.daysOfStock<sku.leadTime/7?"3px solid #dd7a01":"3px solid #dddbda"},
+          {label:"Lead Time",      val:sku.leadTime,                                                   unit:"days",   color:"#0176d3", border:"3px solid #0176d3"},
+          {label:"Avg Daily Use",  val:Math.floor(sku.avgDaily),                                       unit:"units/d",color:"#3e3e3c", border:"3px solid #dddbda"},
         ].map(k=>(
-          <div key={k.label} className="stat-card">
-            <div style={{fontSize:22,fontWeight:800,letterSpacing:"-0.03em",background:k.grad,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1.1}}>
-              {k.val}<span style={{fontSize:10,fontWeight:500,opacity:0.6,marginLeft:4,WebkitTextFillColor:"rgba(148,163,184,0.5)"}}>{k.unit}</span>
+          <div key={k.label} className="stat-card" style={{borderTop:k.border}}>
+            <div style={{fontSize:24,fontWeight:700,color:k.color,lineHeight:1,fontVariantNumeric:"tabular-nums"}}>
+              {k.val}<span style={{fontSize:11,fontWeight:400,color:"#706e6b",marginLeft:5}}>{k.unit}</span>
             </div>
-            <div style={{fontSize:10,fontWeight:600,color:"rgba(148,163,184,0.5)",letterSpacing:"0.08em",textTransform:"uppercase",marginTop:6}}>{k.label}</div>
+            <div style={{fontSize:11,fontWeight:700,color:"#3e3e3c",letterSpacing:"0.04em",textTransform:"uppercase",marginTop:8}}>{k.label}</div>
           </div>
         ))}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:16}}>
         <div className="card" style={{padding:20}}>
-          <div style={{fontSize:11,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:16}}>
-            Projected Stock Curve — 90 Day Horizon
-          </div>
+          <div className="slds-section-title">Projected Stock Curve — 90 Day Horizon</div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={chartData} margin={{top:5,right:20,bottom:5,left:0}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)"/>
-              <XAxis dataKey="day" stroke="transparent" tick={{fontSize:10,fill:"rgba(148,163,184,0.5)"}}/>
-              <YAxis stroke="transparent" tick={{fontSize:10,fill:"rgba(148,163,184,0.5)"}}/>
-              <Tooltip contentStyle={{background:"#0f1629",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,fontSize:11,color:"#e2e8f0",boxShadow:"0 8px 30px rgba(0,0,0,0.4)"}} labelFormatter={d=>`Day ${d}`}/>
-              <ReferenceLine y={sku.safetyStock} stroke="#f97316" strokeDasharray="4 3" label={{value:"Safety",fill:"#fb923c",fontSize:9}}/>
-              <ReferenceLine y={mrp.rop} stroke="#a78bfa" strokeDasharray="4 3" label={{value:"ROP",fill:"#a78bfa",fontSize:9}}/>
-              <ReferenceLine y={0} stroke="#f87171" strokeDasharray="2 2"/>
-              <Line type="monotone" dataKey="stock" stroke="#818cf8" strokeWidth={2.5} dot={false} name="Projected Stock"/>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e8e8e8"/>
+              <XAxis dataKey="day" stroke="#dddbda" tick={{fontSize:11,fill:"#706e6b"}} label={{value:"Days",position:"insideBottom",offset:-2,fontSize:10,fill:"#706e6b"}}/>
+              <YAxis stroke="#dddbda" tick={{fontSize:11,fill:"#706e6b"}}/>
+              <Tooltip contentStyle={{background:"#fff",border:"1px solid #dddbda",borderRadius:4,fontSize:12,color:"#181818",boxShadow:"0 4px 12px rgba(0,0,0,0.15)"}} labelFormatter={d=>`Day ${d}`}/>
+              <ReferenceLine y={sku.safetyStock} stroke="#dd7a01" strokeDasharray="4 3" label={{value:"Safety Stock",fill:"#dd7a01",fontSize:10,position:"insideTopLeft"}}/>
+              <ReferenceLine y={mrp.rop} stroke="#5c4aad" strokeDasharray="4 3" label={{value:"ROP",fill:"#5c4aad",fontSize:10,position:"insideTopLeft"}}/>
+              <ReferenceLine y={0} stroke="#ba0517" strokeDasharray="2 2"/>
+              <Line type="monotone" dataKey="stock" stroke="#0176d3" strokeWidth={2} dot={false} name="Projected Stock"/>
             </LineChart>
           </ResponsiveContainer>
         </div>
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          <div className="card" style={{padding:16}}>
-            <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Open Purchase Orders</div>
-            {openPOs.length===0?<div style={{color:"#334155",fontSize:12}}>No open POs</div>
+          <div className="card" style={{padding:16,flex:"none"}}>
+            <div className="slds-section-title">Open Purchase Orders</div>
+            {openPOs.length===0?<div style={{color:"#706e6b",fontSize:13,padding:"8px 0"}}>No open POs</div>
               :openPOs.map((po,i)=>(
               <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f1f5f9",fontSize:12}}>
                 <span style={{color:"#7c3aed"}}>+{po.qty} units</span>
@@ -959,27 +946,27 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
             ))}
           </div>
           <div className="card" style={{padding:16,flex:1}}>
-            <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Planned Orders (MRP)</div>
-            {mrp.orders.length===0?<div style={{color:"#334155",fontSize:12}}>No planned orders</div>
+            <div className="slds-section-title">Planned Orders (MRP)</div>
+            {mrp.orders.length===0?<div style={{color:"#706e6b",fontSize:13,padding:"8px 0"}}>No planned orders</div>
               :mrp.orders.slice(0,6).map((o,i)=>(
-              <div key={i} style={{padding:"8px 0",borderBottom:"1px solid #f1f5f9",fontSize:12}}>
-                <div style={{display:"flex",justifyContent:"space-between"}}>
-                  <span style={{color:"#2563eb"}}>{o.qty} units</span>
-                  <span style={{color:"#16a34a",fontSize:10}}>MOQ</span>
+              <div key={i} style={{padding:"9px 0",borderBottom:"1px solid #f3f3f3",fontSize:13}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{color:"#0176d3",fontWeight:700}}>{o.qty} units</span>
+                  <span style={{color:"#2e844a",fontSize:11,fontWeight:600,background:"#e8f5e9",padding:"1px 7px",borderRadius:4}}>MOQ</span>
                 </div>
-                <div style={{display:"flex",justifyContent:"space-between",marginTop:2}}>
-                  <span style={{color:"#94a3b8",fontSize:10}}>Order Day {o.orderDay}</span>
-                  <span style={{color:"#94a3b8",fontSize:10}}>Receipt Day {o.receiptDay}</span>
+                <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+                  <span style={{color:"#706e6b",fontSize:11}}>Order Day {o.orderDay}</span>
+                  <span style={{color:"#706e6b",fontSize:11}}>Receipt Day {o.receiptDay}</span>
                 </div>
               </div>
             ))}
           </div>
           <div className="card" style={{padding:16}}>
-            <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10}}>Parameters</div>
-            {[["Lead Time",sku.leadTime+"d"],["MOQ",sku.moq],["Order Multiple",sku.orderMultiple],["Reorder Point",Math.round(mrp.rop)],["Review Cycle",sku.reviewCycle+"d"]].map(([l,v])=>(
-              <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:12}}>
-                <span style={{color:"#64748b"}}>{l}</span>
-                <span style={{color:l==="Reorder Point"?"#7c3aed":"#334155",fontWeight:l==="Reorder Point"?600:400}}>{v}</span>
+            <div className="slds-section-title">Parameters</div>
+            {[["Lead Time",sku.leadTime+"d"],["MOQ",sku.moq],["Order Multiple",sku.orderMultiple],["Reorder Point",Math.round(mrp.rop)+" units"],["Review Cycle",sku.reviewCycle+"d"]].map(([l,v])=>(
+              <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",fontSize:13,borderBottom:"1px solid #f3f3f3"}}>
+                <span style={{color:"#706e6b",fontWeight:500}}>{l}</span>
+                <span style={{color:l==="Reorder Point"?"#5c4aad":"#181818",fontWeight:l==="Reorder Point"?700:500}}>{v}</span>
               </div>
             ))}
           </div>
@@ -995,43 +982,45 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
 function ExceptionView({exceptions,onOpenDetail}) {
   return (
     <div>
-      <div style={{marginBottom:16,fontSize:11,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase"}}>
-        {exceptions.length} SKUs requiring immediate attention
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16,padding:"12px 16px",background:"#fff",border:"1px solid #dddbda",borderRadius:4,boxShadow:"0 2px 3px rgba(0,0,0,0.07)"}}>
+        <span style={{fontSize:14,fontWeight:700,color:"#181818"}}>Exception Report</span>
+        {exceptions.length>0&&<span style={{background:"#fce9e9",color:"#ba0517",fontWeight:700,fontSize:12,padding:"2px 10px",borderRadius:4,border:"1px solid #f5b0b0"}}>{exceptions.length} item{exceptions.length!==1?"s":""} at risk</span>}
       </div>
       {exceptions.length===0&&(
         <div className="card" style={{padding:40,textAlign:"center",color:"#16a34a"}}>
-          <div style={{fontSize:24,marginBottom:8}}>✓</div>
-          <div style={{fontFamily:"'IBM Plex Sans',sans-serif",fontWeight:600,color:"#0f172a"}}>No exceptions — all SKUs within parameters</div>
+          <div style={{fontSize:32,marginBottom:8,color:"#2e844a"}}>✓</div>
+          <div style={{fontWeight:600,color:"#181818",fontSize:14}}>No exceptions — all SKUs within parameters</div>
         </div>
       )}
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:12}}>
         {exceptions.map(s=>{
           const status=s.mrp.status;
+          const borderColor = status==="critical"?"#ba0517":status==="at-risk"?"#dd7a01":"#706e6b";
           return (
-            <div key={s.id} className="card" style={{padding:18,borderColor:STATUS_COLOR[status]+"44",cursor:"pointer"}} onClick={()=>onOpenDetail(s)}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}>
+            <div key={s.id} className="card" style={{padding:0,borderLeft:`4px solid ${borderColor}`,cursor:"pointer",overflow:"hidden"}} onClick={()=>onOpenDetail(s)}>
+              <div style={{padding:"14px 16px",borderBottom:"1px solid #f3f3f3",display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                 <div>
-                  <div style={{color:"#2563eb",fontWeight:600,fontSize:13}}>{s.id}</div>
-                  <div style={{color:"#0f172a",fontSize:12,marginTop:2}}>{s.name}</div>
+                  <div style={{color:"#0176d3",fontWeight:700,fontSize:14,letterSpacing:"0.01em"}}>{s.id}</div>
+                  <div style={{color:"#3e3e3c",fontSize:12,marginTop:2,fontWeight:400}}>{s.name}</div>
                 </div>
-                <span className={`pill badge-${status}`}>{STATUS_LABEL[status]}</span>
+                <span className={`pill badge-${status}`} style={{flexShrink:0}}>{STATUS_LABEL[status]}</span>
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0,background:"#fafaf9"}}>
                 {[
-                  {l:"Stock",  v:Math.floor(s.stock),                warn:s.stock<s.safetyStock},
-                  {l:"Safety", v:Math.floor(s.safetyStock)},
-                  {l:"ROP",    v:Math.floor(s.mrp.rop),  color:"#7c3aed"},
-                  {l:"Cover",  v:s.mrp.daysOfStock>0?Math.floor(s.mrp.daysOfStock)+"d":"OUT", warn:true},
-                ].map(k=>(
-                  <div key={k.l} style={{background:"#f8fafc",border:"1px solid #e2e8f0",padding:"8px 10px",borderRadius:3}}>
-                    <div style={{fontSize:16,fontWeight:600,color:k.color||(k.warn?STATUS_COLOR[status]:"#0f172a"),fontFamily:"'IBM Plex Sans',sans-serif"}}>{k.v}</div>
-                    <div style={{fontSize:9,color:"#94a3b8",textTransform:"uppercase",letterSpacing:"0.06em"}}>{k.l}</div>
+                  {l:"Stock",  v:Math.floor(s.stock),                                         color:s.stock<s.safetyStock?borderColor:"#181818"},
+                  {l:"Safety", v:Math.floor(s.safetyStock),                                   color:"#3e3e3c"},
+                  {l:"ROP",    v:Math.floor(s.mrp.rop),                                       color:"#5c4aad"},
+                  {l:"Cover",  v:s.mrp.daysOfStock>0?Math.floor(s.mrp.daysOfStock)+"d":"OUT", color:borderColor},
+                ].map((k,i)=>(
+                  <div key={k.l} style={{padding:"10px 12px",borderLeft:i>0?"1px solid #e8e8e8":"none"}}>
+                    <div style={{fontSize:18,fontWeight:700,color:k.color,fontVariantNumeric:"tabular-nums"}}>{k.v}</div>
+                    <div style={{fontSize:10,color:"#706e6b",textTransform:"uppercase",letterSpacing:"0.06em",marginTop:2,fontWeight:600}}>{k.l}</div>
                   </div>
                 ))}
               </div>
               {s.mrp.orders.length>0&&(
-                <div style={{marginTop:10,fontSize:11,color:"#2563eb",background:"#eff6ff",border:"1px solid #bfdbfe",padding:"6px 10px",borderRadius:3}}>
-                  → {s.mrp.orders.length} planned order(s)   Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
+                <div style={{padding:"8px 14px",fontSize:12,color:"#0176d3",background:"#e8f4fd",borderTop:"1px solid #b0d4f0",fontWeight:500}}>
+                  → {s.mrp.orders.length} planned order(s) · Next: {s.mrp.orders[0].qty} units (Day {s.mrp.orders[0].orderDay})
                 </div>
               )}
             </div>
@@ -1062,29 +1051,29 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
     <div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:20}}>
         <div className="card" style={{padding:20}}>
-          <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:16}}>SKU Status by Category</div>
+          <div className="slds-section-title">SKU Status by Category</div>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={chartData} margin={{top:0,right:10,bottom:0,left:-10}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)"/>
-              <XAxis dataKey="cat" stroke="transparent" tick={{fontSize:10,fill:"rgba(148,163,184,0.5)"}}/>
-              <YAxis stroke="transparent" tick={{fontSize:10,fill:"rgba(148,163,184,0.5)"}}/>
-              <Tooltip contentStyle={{background:"#0f1629",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,fontSize:11,color:"#e2e8f0",boxShadow:"0 8px 30px rgba(0,0,0,0.4)"}}/>
-              <Legend wrapperStyle={{fontSize:10,color:"rgba(148,163,184,0.6)"}}/>
-              <Bar dataKey="critical" fill="#ef4444" stackId="a" radius={[0,0,0,0]}/>
-              <Bar dataKey="at-risk"  fill="#f97316" stackId="a"/>
-              <Bar dataKey="watch"    fill="#eab308" stackId="a"/>
-              <Bar dataKey="ok"       fill="#22c55e" stackId="a" radius={[4,4,0,0]}/>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e8e8e8"/>
+              <XAxis dataKey="cat" stroke="#dddbda" tick={{fontSize:11,fill:"#706e6b"}}/>
+              <YAxis stroke="#dddbda" tick={{fontSize:11,fill:"#706e6b"}}/>
+              <Tooltip contentStyle={{background:"#fff",border:"1px solid #dddbda",borderRadius:4,fontSize:12,color:"#181818",boxShadow:"0 4px 12px rgba(0,0,0,0.15)"}}/>
+              <Legend wrapperStyle={{fontSize:11,color:"#3e3e3c"}}/>
+              <Bar dataKey="critical" fill="#ba0517" stackId="a"/>
+              <Bar dataKey="at-risk"  fill="#dd7a01" stackId="a"/>
+              <Bar dataKey="watch"    fill="#c2a812" stackId="a"/>
+              <Bar dataKey="ok"       fill="#2e844a" stackId="a" radius={[3,3,0,0]}/>
             </BarChart>
           </ResponsiveContainer>
         </div>
         <div className="card" style={{padding:20}}>
-          <div style={{fontSize:10,color:"#475569",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Planning Logic</div>
-          <div style={{fontSize:11,color:"rgba(148,163,184,0.6)",lineHeight:2,fontFamily:"'IBM Plex Mono',monospace"}}>
-            <p style={{marginBottom:6}}><span style={{color:"#a78bfa",fontWeight:600}}>Reorder Point</span> = Safety Stock + (Avg Daily × Lead Time)</p>
-            <p style={{marginBottom:6}}><span style={{color:"#818cf8",fontWeight:600}}>Order Qty</span> = CEIL(Net Req / Order Multiple) × OM, min MOQ</p>
-            <p style={{marginBottom:6}}><span style={{color:"#f87171",fontWeight:600}}>CRITICAL</span> = Projected stock &lt; 0 at horizon</p>
-            <p style={{marginBottom:6}}><span style={{color:"#fb923c",fontWeight:600}}>AT RISK</span> = Stock &lt; Safety Stock at horizon</p>
-            <p><span style={{color:"#facc15",fontWeight:600}}>WATCH</span> = Days cover &lt; Lead Time (weeks)</p>
+          <div className="slds-section-title">Planning Logic</div>
+          <div style={{fontSize:13,color:"#3e3e3c",lineHeight:1.9}}>
+            <p style={{marginBottom:8}}><span style={{color:"#5c4aad",fontWeight:700}}>Reorder Point</span> = Safety Stock + (Avg Daily × Lead Time)</p>
+            <p style={{marginBottom:8}}><span style={{color:"#0176d3",fontWeight:700}}>Order Qty</span> = CEIL(Net Req / Order Multiple) × OM, min MOQ</p>
+            <p style={{marginBottom:8}}><span style={{color:"#ba0517",fontWeight:700}}>CRITICAL</span> = Projected stock &lt; 0 at horizon</p>
+            <p style={{marginBottom:8}}><span style={{color:"#dd7a01",fontWeight:700}}>AT RISK</span> = Stock &lt; Safety Stock at horizon</p>
+            <p><span style={{color:"#706504",fontWeight:700}}>WATCH</span> = Days cover &lt; Lead Time (weeks)</p>
           </div>
         </div>
       </div>
@@ -1100,12 +1089,12 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
           <tbody>
             {catSummary.map(row=>(
               <tr key={row.cat}>
-                <td style={{color:"#0f172a",fontWeight:600}}>{row.cat}</td>
-                <td>{row.total}</td>
-                <td style={{color:row.critical>0?"#dc2626":"#94a3b8"}}>{row.critical||""}</td>
-                <td style={{color:row["at-risk"]>0?"#ea580c":"#94a3b8"}}>{row["at-risk"]||""}</td>
-                <td style={{color:row.watch>0?"#ca8a04":"#94a3b8"}}>{row.watch||""}</td>
-                <td style={{color:"#16a34a"}}>{row.ok}</td>
+                <td style={{color:"#181818",fontWeight:700}}>{row.cat}</td>
+                <td style={{color:"#3e3e3c",fontWeight:600}}>{row.total}</td>
+                <td>{row.critical>0?<span style={{color:"#ba0517",fontWeight:700}}>{row.critical}</span>:<span style={{color:"#dddbda"}}>—</span>}</td>
+                <td>{row["at-risk"]>0?<span style={{color:"#dd7a01",fontWeight:700}}>{row["at-risk"]}</span>:<span style={{color:"#dddbda"}}>—</span>}</td>
+                <td>{row.watch>0?<span style={{color:"#706504",fontWeight:700}}>{row.watch}</span>:<span style={{color:"#dddbda"}}>—</span>}</td>
+                <td><span style={{color:"#2e844a",fontWeight:700}}>{row.ok}</span></td>
                 <td>{catParams[row.cat]?.leadTime}d</td>
                 <td>{catParams[row.cat]?.moq}</td>
                 <td>{catParams[row.cat]?.orderMultiple}</td>
@@ -1123,20 +1112,22 @@ function CategoryView({catSummary,catParams,setCatParams,enriched}) {
       {editCat&&(
         <div className="modal-overlay" onClick={()=>setEditCat(null)}>
           <div className="modal" onClick={e=>e.stopPropagation()}>
-            <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:20}}>Edit Category Defaults — {editCat}</div>
-            {Object.entries(draft).map(([key,val])=>(
-              <div key={key} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-                <label style={{fontSize:12,color:"#94a3b8",textTransform:"uppercase",letterSpacing:"0.06em"}}>{key}</label>
-                <input className="input" type="number" value={val} style={{width:100,textAlign:"right"}}
-                  onChange={e=>setDraft(d=>({...d,[key]:+e.target.value}))}/>
-              </div>
-            ))}
-            <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:20}}>
+            <div style={{background:"#032D60",padding:"16px 20px",borderRadius:"4px 4px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontSize:14,fontWeight:700,color:"#fff"}}>Edit Category Defaults — {editCat}</div>
+              <button onClick={()=>setEditCat(null)} style={{background:"none",border:"none",color:"rgba(255,255,255,0.7)",fontSize:18,cursor:"pointer",lineHeight:1}}>×</button>
+            </div>
+            <div style={{padding:"20px"}}>
+              {Object.entries(draft).map(([key,val])=>(
+                <div key={key} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+                  <label style={{fontSize:13,color:"#3e3e3c",fontWeight:600,textTransform:"capitalize"}}>{key.replace(/([A-Z])/g," $1")}</label>
+                  <input className="input" type="number" value={val} style={{width:120,textAlign:"right"}}
+                    onChange={e=>setDraft(d=>({...d,[key]:+e.target.value}))}/>
+                </div>
+              ))}
+            </div>
+            <div style={{display:"flex",gap:8,justifyContent:"flex-end",padding:"12px 20px",borderTop:"1px solid #dddbda",background:"#fafaf9",borderRadius:"0 0 4px 4px"}}>
               <button className="btn" onClick={()=>setEditCat(null)}>Cancel</button>
-              <button className="btn btn-primary" onClick={()=>{
-                setCatParams({...catParams,[editCat]:draft});
-                setEditCat(null);
-              }}>Save to DB</button>
+              <button className="btn btn-primary" onClick={()=>{setCatParams({...catParams,[editCat]:draft});setEditCat(null);}}>Save to DB</button>
             </div>
           </div>
         </div>
@@ -1166,24 +1157,33 @@ function ParamModal({sku,catParams,skuOverrides,onSave,onClose}) {
             + sku.avgDaily * (draft.leadTime!==""?+draft.leadTime:(cat?.leadTime||0));
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e=>e.stopPropagation()} style={{minWidth:460}}>
-        <div style={{fontSize:13,fontWeight:600,color:"#0f172a",marginBottom:4}}>SKU Parameters — {sku.id}</div>
-        <div style={{fontSize:11,color:"#94a3b8",marginBottom:20}}>Leave blank to inherit from category ({sku.category})</div>
-        {fields.map(f=>(
-          <div key={f.key} style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
-            <label style={{fontSize:11,color:"#94a3b8",textTransform:"uppercase",letterSpacing:"0.06em",width:140}}>{f.label}</label>
-            <input className="input" type="number" placeholder={`Cat: ${f.catVal}`} value={draft[f.key]} style={{width:100,textAlign:"right"}}
-              onChange={e=>setDraft(d=>({...d,[f.key]:e.target.value}))}/>
-            {draft[f.key]!==""&&<span style={{fontSize:10,color:"#2563eb"}}>OVERRIDE</span>}
-            <button className="btn" style={{fontSize:9,padding:"2px 7px",marginLeft:"auto"}}
-              onClick={()=>setDraft(d=>({...d,[f.key]:""}))} >RESET</button>
+      <div className="modal" onClick={e=>e.stopPropagation()} style={{minWidth:480}}>
+        {/* SLDS Modal Header */}
+        <div style={{background:"#032D60",padding:"16px 20px",borderRadius:"4px 4px 0 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div style={{fontSize:14,fontWeight:700,color:"#fff"}}>SKU Parameters — {sku.id}</div>
+            <div style={{fontSize:11,color:"rgba(255,255,255,0.6)",marginTop:2}}>Leave blank to inherit from category: {sku.category}</div>
           </div>
-        ))}
-        <div style={{background:"rgba(139,92,246,0.1)",border:"1px solid rgba(139,92,246,0.25)",borderRadius:10,padding:"12px 16px",marginTop:8,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={{fontSize:11,color:"#a78bfa",fontWeight:600,letterSpacing:"0.04em"}}>Calculated Reorder Point</span>
-          <span style={{fontSize:18,fontWeight:800,background:"linear-gradient(135deg,#8b5cf6,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"-0.02em"}}>{Math.round(rop)} <span style={{fontSize:10,fontWeight:500,WebkitTextFillColor:"rgba(148,163,184,0.5)"}}>units</span></span>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"rgba(255,255,255,0.7)",fontSize:18,cursor:"pointer",lineHeight:1}}>×</button>
         </div>
-        <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:20}}>
+        {/* Body */}
+        <div style={{padding:"20px"}}>
+          {fields.map(f=>(
+            <div key={f.key} style={{display:"flex",alignItems:"center",gap:12,marginBottom:14,paddingBottom:14,borderBottom:"1px solid #f3f3f3"}}>
+              <label style={{fontSize:13,color:"#3e3e3c",fontWeight:600,width:160,flexShrink:0}}>{f.label}</label>
+              <input className="input" type="number" placeholder={`Default: ${f.catVal}`} value={draft[f.key]} style={{width:120,textAlign:"right"}}
+                onChange={e=>setDraft(d=>({...d,[f.key]:e.target.value}))}/>
+              {draft[f.key]!==""&&<span style={{fontSize:11,color:"#0176d3",fontWeight:700,background:"#e8f4fd",padding:"2px 8px",borderRadius:4}}>OVERRIDE</span>}
+              <button className="btn" style={{fontSize:11,padding:"4px 10px",marginLeft:"auto"}} onClick={()=>setDraft(d=>({...d,[f.key]:""}))}>Reset</button>
+            </div>
+          ))}
+          <div style={{background:"#f3eeff",border:"1px solid #c9b8f5",borderRadius:4,padding:"12px 16px",marginTop:4,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{fontSize:13,color:"#5c4aad",fontWeight:700}}>Calculated Reorder Point</span>
+            <span style={{fontSize:20,fontWeight:700,color:"#5c4aad"}}>{Math.round(rop)} <span style={{fontSize:12,fontWeight:400,color:"#706e6b"}}>units</span></span>
+          </div>
+        </div>
+        {/* Footer */}
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end",padding:"12px 20px",borderTop:"1px solid #dddbda",background:"#fafaf9",borderRadius:"0 0 4px 4px"}}>
           <button className="btn" onClick={onClose}>Cancel</button>
           <button className="btn btn-primary" onClick={()=>{
             const ov={};
