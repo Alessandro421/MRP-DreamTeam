@@ -148,6 +148,35 @@ function rowsToSkus(rows) {
     };
   });
 }
+function sanitizeUploadedSkus(skus) {
+  const toNum = (value, fallback = 0) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : fallback;
+  };
+
+  return skus
+    .filter((s) => s && typeof s === "object")
+    .map((s, idx) => {
+      const id = (s.id || `SKU-${idx + 1}`).toString().trim().toUpperCase();
+      const category = CATEGORIES.includes(s.category) ? s.category : "Spare Parts";
+      const overrides = s.overrides && typeof s.overrides === "object" ? s.overrides : {};
+
+      return {
+        id,
+        name: (s.name || id).toString(),
+        category,
+        stock: toNum(s.stock, 0),
+        avgDaily: toNum(s.avgDaily, 0),
+        overrides: {
+          ...(overrides.leadTime != null ? { leadTime: toNum(overrides.leadTime, 0) } : {}),
+          ...(overrides.moq != null ? { moq: toNum(overrides.moq, 0) } : {}),
+          ...(overrides.orderMultiple != null ? { orderMultiple: toNum(overrides.orderMultiple, 1) } : {}),
+          ...(overrides.safetyStock != null ? { safetyStock: toNum(overrides.safetyStock, 0) } : {}),
+          ...(overrides.reviewCycle != null ? { reviewCycle: toNum(overrides.reviewCycle, 7) } : {}),
+        },
+      };
+    });
+}
 function rowsToPOs(rows) {
   const pos = {};
   rows.filter(r => r.id || r.sku).forEach(r => {
@@ -449,12 +478,12 @@ export default function MRPPlanner() {
     reader.onload = async (ev) => {
       try {
         const rows = parseCSV(ev.target.result);
-        const newSkus = rowsToSkus(rows);
+        const newSkus = sanitizeUploadedSkus(rowsToSkus(rows));
         const newPOs = rowsToPOs(rows);
 
         if (newSkus.length) {
           setSkusRaw(newSkus);
-          const newOv = Object.fromEntries(newSkus.map((s) => [s.id, s.overrides]));
+          const newOv = Object.fromEntries(newSkus.map((s) => [s.id, s.overrides || {}]));
           setSkuOverrides(newOv);
           setUploadMsg(`Loaded ${newSkus.length} SKUs from ${file.name}`);
 
