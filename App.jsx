@@ -229,10 +229,13 @@ export default function MRPPlanner() {
   const [uploadMsg, setUploadMsg] = useState("");
   const [lastDbError, setLastDbError] = useState("");
   const [syncMsg, setSyncMsg] = useState("");
+  const [transactions, setTransactions] = useState([]);
+  const [retryKey, setRetryKey] = useState(0); // incremented to force subscription reconnect
   const fileRef = useRef();
   const channelName = useRef("mrp_global_v1");
   const channelRef = useRef(null);
   const debounceTimer = useRef(null);
+  const retryTimerRef = useRef(null);
 
   function formatDbError(error, fallback) {
     if (!error) return fallback;
@@ -260,11 +263,12 @@ export default function MRPPlanner() {
     try {
       setSyncMsg("Refreshing from DB...");
 
-      const [skusRes, posRes, ovRes, catRes] = await Promise.all([
+      const [skusRes, posRes, ovRes, catRes, txRes] = await Promise.all([
       fetchAllRows("mrp_skus"),
               fetchAllRows("mrp_open_pos"),
               fetchAllRows("mrp_sku_overrides"),
               fetchAllRows("mrp_category_params"),
+              fetchAllRows("mrp_transactions"),
       ]);
 
       const firstError =
@@ -287,10 +291,13 @@ export default function MRPPlanner() {
           ? dbCatParamsToApp(catRes.data)
           : { ...CATEGORY_DEFAULTS }
       );
+      // mrp_transactions table is optional — ignore error if it doesn't exist yet
+      if (!txRes.error) setTransactions(txRes.data ?? []);
 
       setDbStatus("live");
       setLastDbError("");
       setSyncMsg("DB sync complete");
+      setTimeout(() => setSyncMsg(m => m === "DB sync complete" ? "" : m), 3000);
       return true;
     } catch (err) {
       setDbStatus("offline");
@@ -317,9 +324,10 @@ export default function MRPPlanner() {
   // ── Realtime subscription: auto-refresh when DB changes ──
   useEffect(() => {
     setRealtimeStatus("connecting");
+    clearTimeout(retryTimerRef.current);
 
     const channel = supabase
-      .channel(channelName.current)
+      .channel(channelName.current + "_r" + retryKey)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "mrp_skus" },
@@ -340,15 +348,25 @@ export default function MRPPlanner() {
         { event: "*", schema: "public", table: "mrp_category_params" },
         () => { debouncedLoad(); }
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "mrp_transactions" },
+        () => { debouncedLoad(); }
+      )
       .on("broadcast", { event: "data_changed" }, () => { debouncedLoad(); })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
           setRealtimeStatus("subscribed");
-          console.log("[Realtime] Subscription active");
+          console.log("[Realtime] Subscription active (retry=" + retryKey + ")");
         } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
           setRealtimeStatus("error");
-          console.warn("[Realtime] Connection issue:", status);
+          console.warn("[Realtime] Connection issue:", status, "— retrying in 5s");
           debouncedLoad();
+          // Auto-reconnect: increment retryKey after 5 seconds
+          retryTimerRef.current = setTimeout(
+            () => setRetryKey(k => k + 1),
+            5000
+          );
         }
       });
 
@@ -358,8 +376,9 @@ export default function MRPPlanner() {
       supabase.removeChannel(channel);
       channelRef.current = null;
       clearTimeout(debounceTimer.current);
+      clearTimeout(retryTimerRef.current);
     };
-  }, [loadFromDB, debouncedLoad]);
+  }, [loadFromDB, debouncedLoad, retryKey]);
 
   // ── Save SKU overrides to Supabase ──
   const saveSkuOverride = useCallback(
@@ -428,6 +447,47 @@ export default function MRPPlanner() {
       await loadFromDB();
     },
     [dbStatus, catParams, loadFromDB, broadcastChange]
+  );
+
+  // ── Commit MRP planned orders as transactions to Supabase ──
+  // Requires mrp_transactions table:
+  // CREATE TABLE mrp_transactions (
+  //   id BIGSERIAL PRIMARY KEY,
+  //   sku_id TEXT NOT NULL,
+  //   qty NUMERIC NOT NULL,
+  //   order_day INTEGER NOT NULL,
+  //   receipt_day INTEGER NOT NULL,
+  //   status TEXT NOT NULL DEFAULT 'planned',
+  //   committed_at TIMESTAMPTZ DEFAULT NOW()
+  // );
+  const commitPlannedOrders = useCallback(
+    async (skuId, orders) => {
+      if (dbStatus !== "live") {
+        setLastDbError("Cannot commit orders: database is offline.");
+        return;
+      }
+      if (!orders.length) return;
+
+      const rows = orders.map(o => ({
+        sku_id: skuId,
+        qty: o.qty,
+        order_day: o.orderDay,
+        receipt_day: o.receiptDay,
+        status: "planned",
+      }));
+
+      const { error } = await supabase.from("mrp_transactions").insert(rows);
+
+      if (error) {
+        setLastDbError(formatDbError(error, "Failed to commit planned orders."));
+        return;
+      }
+
+      setLastDbError("");
+      broadcastChange();
+      await loadFromDB();
+    },
+    [dbStatus, broadcastChange, loadFromDB]
   );
 
   // ── File upload handler ──
@@ -646,7 +706,7 @@ export default function MRPPlanner() {
     dbStatus === "live" ? "DB LIVE" : dbStatus === "loading" ? "CONNECTING..." : "OFFLINE";
 
   const rtDot =
-    realtimeStatus === "subscribed" ? "#16a34a" : realtimeStatus === "connecting" ? "#f59e0b" : "#ca8a04";
+    realtimeStatus === "subscribed" ? "#16a34a" : realtimeStatus === "connecting" ? "#f59e0b" : "#dc2626";
   const rtLabel =
     realtimeStatus === "subscribed" ? "REALTIME" : realtimeStatus === "connecting" ? "RT CONN..." : "RT ERROR";
 
@@ -725,10 +785,11 @@ export default function MRPPlanner() {
         {/* Nav tabs */}
         <div style={{display:"flex",alignItems:"stretch",height:"100%",flex:1}}>
           {[
-            {k:"workbench", label:"Planner Workbench"},
-            {k:"exceptions",label:`Exceptions${exceptions.length>0?` (${exceptions.length})`:""}` },
-            {k:"categories",label:"Category Summary"},
-            {k:"demand",    label:"Demand Analysis"},
+            {k:"workbench",    label:"Planner Workbench"},
+            {k:"exceptions",   label:`Exceptions${exceptions.length>0?` (${exceptions.length})`:""}` },
+            {k:"categories",   label:"Category Summary"},
+            {k:"demand",       label:"Demand Analysis"},
+            {k:"transactions", label:`Transactions${transactions.length>0?` (${transactions.length})`:""}` },
           ].map(({k,label})=>(
             <button key={k}
               style={{background:"none",border:"none",padding:"0 16px",height:"100%",cursor:"pointer",fontFamily:"'Inter',Arial,sans-serif",fontSize:13,fontWeight:view===k||(view==="detail"&&k==="workbench")?700:400,color:view===k||(view==="detail"&&k==="workbench")?"#fff":"rgba(255,255,255,0.65)",transition:"all 0.15s",borderBottom:view===k||(view==="detail"&&k==="workbench")?"3px solid #1589ee":"3px solid transparent",whiteSpace:"nowrap"}}
@@ -788,7 +849,8 @@ export default function MRPPlanner() {
         {view==="detail"&&selectedSKU&&(
           <DetailView sku={enriched.find(s=>s.id===selectedSKU.id)||selectedSKU} mrp={mrpResults[selectedSKU.id]}
             openPOs={openPOs[selectedSKU.id]||[]}
-            onBack={()=>setView("workbench")} onEditParams={()=>setEditingParams(selectedSKU)}/>
+            onBack={()=>setView("workbench")} onEditParams={()=>setEditingParams(selectedSKU)}
+            onCommitOrders={orders=>commitPlannedOrders(selectedSKU.id, orders)}/>
         )}
         {view==="exceptions"&&(
           <ExceptionView exceptions={exceptions} onOpenDetail={s=>{setSelectedSKU(s);setView("detail");}}/>
@@ -798,6 +860,9 @@ export default function MRPPlanner() {
             setCatParams={saveCatParams} enriched={enriched}/>
         )}
         {view==="demand"&&<DemandView/>}
+        {view==="transactions"&&(
+          <TransactionsView transactions={transactions} enriched={enriched}/>
+        )}
       </div>
 
       {editingParams&&(
@@ -900,7 +965,7 @@ function WorkbenchView({enriched,filterCat,setFilterCat,filterStatus,setFilterSt
 // ─────────────────────────────────────────────
 //  DETAIL VIEW (unchanged)
 // ─────────────────────────────────────────────
-function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
+function DetailView({sku,mrp,openPOs,onBack,onEditParams,onCommitOrders}) {
   const chartData = mrp.curve.filter((_,i)=>i%3===0);
   const status = mrp.status;
   return (
@@ -964,7 +1029,13 @@ function DetailView({sku,mrp,openPOs,onBack,onEditParams}) {
             ))}
           </div>
           <div className="card" style={{padding:16,flex:1}}>
-            <div className="slds-section-title">Planned Orders (MRP)</div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+              <div style={{fontSize:12,fontWeight:700,color:"#3e3e3c",textTransform:"uppercase",letterSpacing:"0.06em"}}>Planned Orders (MRP)</div>
+              {mrp.orders.length>0&&onCommitOrders&&(
+                <button className="btn btn-primary" style={{fontSize:11,padding:"3px 10px"}}
+                  onClick={()=>onCommitOrders(mrp.orders)}>Commit to DB</button>
+              )}
+            </div>
             {mrp.orders.length===0?<div style={{color:"#706e6b",fontSize:13,padding:"8px 0"}}>No planned orders</div>
               :mrp.orders.slice(0,6).map((o,i)=>(
               <div key={i} style={{padding:"9px 0",borderBottom:"1px solid #f3f3f3",fontSize:13}}>
@@ -1282,6 +1353,97 @@ function enrichWithMaster(items, masterMap) {
     return { ...item, lt, moq, multipleLot, safetyStock, rop };
   });
 }
+// ─────────────────────────────────────────────
+//  TRANSACTIONS VIEW
+// ─────────────────────────────────────────────
+function TransactionsView({ transactions, enriched }) {
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [search, setSearch] = useState("");
+
+  const skuMap = useMemo(
+    () => Object.fromEntries(enriched.map(s => [s.id, s])),
+    [enriched]
+  );
+
+  const filtered = useMemo(() => {
+    let rows = [...transactions].sort(
+      (a, b) => new Date(b.committed_at || 0) - new Date(a.committed_at || 0)
+    );
+    if (filterStatus !== "All") rows = rows.filter(r => r.status === filterStatus);
+    if (search)
+      rows = rows.filter(
+        r =>
+          r.sku_id.toLowerCase().includes(search.toLowerCase()) ||
+          (skuMap[r.sku_id]?.name || "").toLowerCase().includes(search.toLowerCase())
+      );
+    return rows;
+  }, [transactions, filterStatus, search, skuMap]);
+
+  const STATUS_BADGE = {
+    planned: { bg: "#e8f4fd", color: "#0176d3" },
+    confirmed: { bg: "#e8f5e9", color: "#2e844a" },
+    cancelled: { bg: "#fce9e9", color: "#ba0517" },
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "center", flexWrap: "wrap", padding: "12px 16px", background: "#fff", border: "1px solid #dddbda", borderRadius: "4px 4px 0 0", borderBottom: "none" }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: "#181818", marginRight: 8 }}>MRP Transactions</span>
+        <span style={{ fontSize: 12, color: "#706e6b", marginRight: "auto" }}>{filtered.length} records</span>
+        <input className="input" placeholder="Search SKU or name…" value={search} onChange={e => setSearch(e.target.value)} style={{ width: 200 }} />
+        <select className="select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+          <option value="All">All Status</option>
+          <option value="planned">Planned</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      {transactions.length === 0 ? (
+        <div className="card" style={{ padding: 48, textAlign: "center", borderRadius: "0 0 4px 4px" }}>
+          <div style={{ fontSize: 28, marginBottom: 12, color: "#dddbda" }}>📋</div>
+          <div style={{ fontWeight: 600, fontSize: 14, color: "#181818", marginBottom: 8 }}>No committed transactions yet</div>
+          <div style={{ fontSize: 12, color: "#706e6b" }}>Open a SKU in the Planner Workbench and click <strong>Commit to DB</strong> on its planned orders.</div>
+        </div>
+      ) : (
+        <div className="card" style={{ overflow: "auto", borderRadius: "0 0 4px 4px" }}>
+          <table>
+            <thead>
+              <tr>
+                {["SKU", "Description", "Qty", "Order Day", "Receipt Day", "Status", "Committed At"].map(h => (
+                  <th key={h}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((tx, i) => {
+                const sku = skuMap[tx.sku_id];
+                const badge = STATUS_BADGE[tx.status] || STATUS_BADGE.planned;
+                return (
+                  <tr key={tx.id || i} className="sku-row">
+                    <td style={{ color: "#0176d3", fontWeight: 700 }}>{tx.sku_id}</td>
+                    <td style={{ color: "#3e3e3c" }}>{sku?.name || ""}</td>
+                    <td style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{tx.qty}</td>
+                    <td style={{ color: "#706e6b" }}>Day {tx.order_day}</td>
+                    <td style={{ color: "#706e6b" }}>Day {tx.receipt_day}</td>
+                    <td>
+                      <span className="pill" style={{ background: badge.bg, color: badge.color }}>
+                        {tx.status?.toUpperCase() || "PLANNED"}
+                      </span>
+                    </td>
+                    <td style={{ fontSize: 11, color: "#706e6b" }}>
+                      {tx.committed_at ? new Date(tx.committed_at).toLocaleString() : "—"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DemandView() {
   const [rows, setRows] = useState([]);
   const [masterMap, setMasterMap] = useState({});
