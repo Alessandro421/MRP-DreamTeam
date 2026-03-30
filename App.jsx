@@ -208,6 +208,21 @@ function dbCatParamsToApp(rows) {
 // ─────────────────────────────────────────────
 //  MAIN APP
 // ─────────────────────────────────────────────
+const LS_TX_KEY = "mrp_transactions";
+
+function loadTxFromStorage() {
+  try {
+    return JSON.parse(localStorage.getItem(LS_TX_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+function saveTxToStorage(rows) {
+  try {
+    localStorage.setItem(LS_TX_KEY, JSON.stringify(rows));
+  } catch { /* quota exceeded — silently ignore */ }
+}
+
 export default function MRPPlanner() {
   const [view,          setView]          = useState("workbench");
   const [selectedSKU,   setSelectedSKU]   = useState(null);
@@ -229,13 +244,14 @@ export default function MRPPlanner() {
   const [uploadMsg, setUploadMsg] = useState("");
   const [lastDbError, setLastDbError] = useState("");
   const [syncMsg, setSyncMsg] = useState("");
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState(() => loadTxFromStorage());
   const [retryKey, setRetryKey] = useState(0); // incremented to force subscription reconnect
   const fileRef = useRef();
   const channelName = useRef("mrp_global_v1");
   const channelRef = useRef(null);
   const debounceTimer = useRef(null);
   const retryTimerRef = useRef(null);
+  const MAX_RT_RETRIES = 3;
 
   function formatDbError(error, fallback) {
     if (!error) return fallback;
@@ -263,12 +279,11 @@ export default function MRPPlanner() {
     try {
       setSyncMsg("Refreshing from DB...");
 
-      const [skusRes, posRes, ovRes, catRes, txRes] = await Promise.all([
+      const [skusRes, posRes, ovRes, catRes] = await Promise.all([
       fetchAllRows("mrp_skus"),
               fetchAllRows("mrp_open_pos"),
               fetchAllRows("mrp_sku_overrides"),
               fetchAllRows("mrp_category_params"),
-              fetchAllRows("mrp_transactions"),
       ]);
 
       const firstError =
@@ -291,9 +306,6 @@ export default function MRPPlanner() {
           ? dbCatParamsToApp(catRes.data)
           : { ...CATEGORY_DEFAULTS }
       );
-      // mrp_transactions table is optional — ignore error if it doesn't exist yet
-      if (!txRes.error) setTransactions(txRes.data ?? []);
-
       setDbStatus("live");
       setLastDbError("");
       setSyncMsg("DB sync complete");
@@ -348,11 +360,6 @@ export default function MRPPlanner() {
         { event: "*", schema: "public", table: "mrp_category_params" },
         () => { debouncedLoad(); }
       )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "mrp_transactions" },
-        () => { debouncedLoad(); }
-      )
       .on("broadcast", { event: "data_changed" }, () => { debouncedLoad(); })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
@@ -360,13 +367,15 @@ export default function MRPPlanner() {
           console.log("[Realtime] Subscription active (retry=" + retryKey + ")");
         } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
           setRealtimeStatus("error");
-          console.warn("[Realtime] Connection issue:", status, "— retrying in 5s");
+          console.warn("[Realtime] Connection issue:", status, "(attempt " + (retryKey + 1) + "/" + MAX_RT_RETRIES + ")");
           debouncedLoad();
-          // Auto-reconnect: increment retryKey after 5 seconds
-          retryTimerRef.current = setTimeout(
-            () => setRetryKey(k => k + 1),
-            5000
-          );
+          // Auto-reconnect up to MAX_RT_RETRIES times, then give up
+          if (retryKey < MAX_RT_RETRIES - 1) {
+            retryTimerRef.current = setTimeout(
+              () => setRetryKey(k => k + 1),
+              5000
+            );
+          }
         }
       });
 
@@ -449,45 +458,26 @@ export default function MRPPlanner() {
     [dbStatus, catParams, loadFromDB, broadcastChange]
   );
 
-  // ── Commit MRP planned orders as transactions to Supabase ──
-  // Requires mrp_transactions table:
-  // CREATE TABLE mrp_transactions (
-  //   id BIGSERIAL PRIMARY KEY,
-  //   sku_id TEXT NOT NULL,
-  //   qty NUMERIC NOT NULL,
-  //   order_day INTEGER NOT NULL,
-  //   receipt_day INTEGER NOT NULL,
-  //   status TEXT NOT NULL DEFAULT 'planned',
-  //   committed_at TIMESTAMPTZ DEFAULT NOW()
-  // );
+  // ── Commit MRP planned orders as transactions (stored in localStorage) ──
   const commitPlannedOrders = useCallback(
-    async (skuId, orders) => {
-      if (dbStatus !== "live") {
-        setLastDbError("Cannot commit orders: database is offline.");
-        return;
-      }
+    (skuId, orders) => {
       if (!orders.length) return;
-
-      const rows = orders.map(o => ({
+      const newRows = orders.map(o => ({
+        id: Date.now() + Math.random(),
         sku_id: skuId,
         qty: o.qty,
         order_day: o.orderDay,
         receipt_day: o.receiptDay,
         status: "planned",
+        committed_at: new Date().toISOString(),
       }));
-
-      const { error } = await supabase.from("mrp_transactions").insert(rows);
-
-      if (error) {
-        setLastDbError(formatDbError(error, "Failed to commit planned orders."));
-        return;
-      }
-
-      setLastDbError("");
-      broadcastChange();
-      await loadFromDB();
+      setTransactions(prev => {
+        const updated = [...prev, ...newRows];
+        saveTxToStorage(updated);
+        return updated;
+      });
     },
-    [dbStatus, broadcastChange, loadFromDB]
+    []
   );
 
   // ── File upload handler ──
